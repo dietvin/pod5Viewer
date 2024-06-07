@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog
 from PySide6.QtGui import QStandardItemModel, QStandardItem
+
 import sys, os, pod5, pathlib, datetime, uuid
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Any
 import numpy as np
 
 
