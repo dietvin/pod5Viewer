@@ -184,8 +184,8 @@ class Pod5Viewer(QMainWindow):
         # right column to show data
         self.data_viewer = QTreeView()
 
-        layout.addWidget(self.file_navigator)
-        layout.addWidget(self.data_viewer)
+        layout.addWidget(self.file_navigator, 1)
+        layout.addWidget(self.data_viewer, 2)
 
     def select_files(self):
         """
