@@ -1,3 +1,6 @@
+*.pod5
+pod5_files/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
