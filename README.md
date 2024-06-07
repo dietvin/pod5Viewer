@@ -16,17 +16,19 @@ Pod5Viewer is a Python application that provides a graphical interface for viewi
 To install the required packages, you can use `pip`. If you haven't installed these libraries yet, run:
 
 ```bash
-pip install PySide6 pod5 numpy
+git clone https://github.com/dietvin/pod5Viewer.git
+cd pod5Viewer
+pip install .
 ```
 
 ## Usage
 To run the application, navigate to the directory containing the script and execute it with Python:
 ```bash
-python pod5_viewer.py
+pod5Viewer
 ```
 You can optionally specify POD5 files as command-line arguments:
 ```bash
-python pod5_viewer.py file1.pod5 file2.pod5
+pod5Viewer file1.pod5 file2.pod5
 ```
 ## User Interface
 
