@@ -198,7 +198,7 @@ class Pod5Viewer(QMainWindow):
         """
         Displays a message box with information about the application.
         """
-        about_text = f"<center><b>pod5view</b><br>v{__version__}</center><br><br>Author: Vincent Dietrich<br>Github: https://github.com/dietvin/pod5Viewer</center>"
+        about_text = f"<center><b>pod5view</b><br>vv0.0.2{__version__}</center><br><br>Author: Vincent Dietrich<br>Github: https://github.com/dietvin/pod5Viewer</center>"
         self.about_dialog.setText(about_text)
         self.about_dialog.exec()
 
