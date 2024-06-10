@@ -1,10 +1,11 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 
 import sys, os, pod5, pathlib, datetime, uuid
 from typing import Dict, List, Any
 import numpy as np
 
+from help_strings import HELP
 
 class DataHandler:
     """
@@ -161,7 +162,7 @@ class Pod5Viewer(QMainWindow):
         Initializes the user interface elements of the Pod5Viewer.
         Sets up the window title, menu, layout, and widgets.
         """
-        self.setWindowTitle("pod5view")
+        self.setWindowTitle("pod5Viewer")
 
         # set up the dropdown menu in the top
         menubar = self.menuBar()
@@ -170,6 +171,11 @@ class Pod5Viewer(QMainWindow):
         main_menu.addAction("Open directory...", self.select_directory)
         main_menu.addSeparator()
         main_menu.addAction("Exit", self.close)
+
+        help_menu = menubar.addMenu("Help")
+        help_menu.addAction("About", self.show_about)
+
+        self.about_dialog = QMessageBox()
 
         # create the layout
         layout = QHBoxLayout()
@@ -186,6 +192,14 @@ class Pod5Viewer(QMainWindow):
 
         layout.addWidget(self.file_navigator, 1)
         layout.addWidget(self.data_viewer, 2)
+
+    def show_about(self):
+        """
+        Displays a message box with information about the application.
+        """
+        about_text = "<center><b>pod5view</b><br>v0.0.2</center><br><br>Author: Vincent Dietrich<br>Github: https://github.com/dietvin/pod5Viewer</center>"
+        self.about_dialog.setText(about_text)
+        self.about_dialog.exec()
 
     def select_files(self):
         """
@@ -239,7 +253,9 @@ class Pod5Viewer(QMainWindow):
         """
         for path, items in id_path_dict.items():
             path_item = QTreeWidgetItem([path])
+            path_item.setToolTip(0,path)
             self.file_navigator.addTopLevelItem(path_item)
+
             
             for id_item in items:
                 id_tree_item = QTreeWidgetItem([id_item])
@@ -263,24 +279,37 @@ class Pod5Viewer(QMainWindow):
 
             data_viewer_data = self.data_handler.load_read_data(read_id_str)
             self.populate_data_viewer(self.model.invisibleRootItem(), data_viewer_data)
+            self.data_viewer.setColumnWidth(0, 230)
 
-    def populate_data_viewer(self, parent: QStandardItem, data: Dict[str, Any]):
+    def populate_data_viewer(self, parent: QStandardItem, data: Dict[str, Any], parent_keys: List[str] = []):
         """
         Recursively populates the data viewer with hierarchical data.
 
         Args:
             parent (QStandardItem): The parent item in the data viewer.
             data (Dict[str, Any]): The data to be displayed, structured as a dictionary.
+            parent_keys (List[str]): The list of parent keys leading to the current data.
         """
         for key, value in data.items():
+            help_str = HELP.get(" ".join(parent_keys + [key]), None)
+            if not help_str:
+                help_str = "No docstring available"
+
             if isinstance(value, dict):
                 item = QStandardItem(key)
+                item.setEditable(False)
+                item.setToolTip(help_str)
                 parent.appendRow(item)
-                self.populate_data_viewer(item, value)
+                # if statement to catch the individual signal_rows entries (need 'signal_rows <key>' without number)
+                self.populate_data_viewer(item, value, parent_keys if key.isdigit() else parent_keys + [key])
             else:
                 key_item = QStandardItem(key)
+                key_item.setEditable(False)
+                key_item.setToolTip(help_str)
+
                 value_item = QStandardItem(str(value))
                 parent.appendRow([key_item, value_item])
+
 
 
 def main():
