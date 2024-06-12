@@ -1,7 +1,7 @@
 try:
-    from .pod5Viewer import Pod5Viewer
-except:
     from pod5Viewer import Pod5Viewer
+except:
+    from pod5Viewer.pod5Viewer import Pod5Viewer
     
 from PySide6.QtWidgets import QApplication
 import sys

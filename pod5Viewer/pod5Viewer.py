@@ -5,8 +5,13 @@ import sys, os, pod5, pathlib, datetime, uuid
 from typing import Dict, List, Any
 import numpy as np
 
-from help_strings import HELP
-from __version__ import __version__
+try:
+    from help_strings import HELP
+    from __version__ import __version__
+
+except:
+    from pod5Viewer.help_strings import HELP
+    from pod5Viewer.__version__ import __version__
 
 class DataHandler:
     """
