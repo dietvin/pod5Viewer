@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtWebEngineWidgets import QWebEngineView
-import sys, os, pod5, pathlib, datetime, uuid
+import sys, os, pod5, pathlib, datetime, uuid, yaml
 from typing import Dict, List, Any
 import numpy as np
 import plotly.graph_objects as go
@@ -175,6 +175,8 @@ class Pod5Viewer(QMainWindow):
         main_menu.addAction("Open file(s)...", self.select_files)
         main_menu.addAction("Open directory...", self.select_directory)
         main_menu.addSeparator()
+        main_menu.addAction("Export current read...", self.export_current_read)
+        main_menu.addSeparator()
         main_menu.addAction("Exit", self.close)
 
         view_menu = menubar.addMenu("View")
@@ -326,6 +328,53 @@ class Pod5Viewer(QMainWindow):
                     value_item = QStandardItem(str(value))
 
                 parent.appendRow([key_item, value_item])
+
+    def export_current_read(self):
+        """
+        Exports the current read data to a YAML file.
+
+        This method prompts the user to select a directory to save the exported data.
+        It then constructs a file path using the selected directory and the current read ID.
+        The signal data is transformed to comma-separated strings and written to the file in YAML format.
+
+        Returns:
+            None
+        """
+        if self.data_viewer_data:
+            # Get the selected read ID
+            read_id = self.data_viewer_data["read_id"]
+            # Prompt the user to select a directory
+            dialog = QFileDialog(self, "Export Current Read")
+            dialog.setFileMode(QFileDialog.Directory)
+            dialog.setOption(QFileDialog.ShowDirsOnly, True)
+
+            if dialog.exec():
+                directory_path = dialog.selectedFiles()[0]
+                # Construct the file path using the read ID
+                file_path = os.path.join(directory_path, f"{read_id}.yaml")
+                # Transform "signal" and "signal_pa" entries to comma separated strings
+                transformed_data = self.transform_data(self.data_viewer_data)
+                # Write the transformed data to the selected file in YAML format
+                with open(file_path, 'w') as file:
+                    yaml.dump(transformed_data, file)
+        
+    def transform_data(self, data) -> Dict[str, Any]:
+        """
+        Transforms the "signal" and "signal_pa" entries in the data to comma separated strings.
+
+        Args:
+            data (Dict[str, Any]): The data to be transformed.
+
+        Returns:
+            Dict[str, Any]: The transformed data.
+        """
+        transformed_data = {}
+        for key, value in data.items():
+            if key == "signal" or key == "signal_pa":
+                transformed_data[key] = ",".join(str(x) for x in value)
+            else:
+                transformed_data[key] = value
+        return transformed_data
 
     def plot_signal(self):
         """
