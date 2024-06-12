@@ -253,6 +253,11 @@ class Pod5Viewer(QMainWindow):
         Args:
             file_paths (List[str]): A list of file paths to POD5 files to be loaded.
         """
+        # clear the file navigator and data viewer
+        self.file_navigator.clear()
+        self.model = QStandardItemModel()
+        self.data_viewer.setModel(self.model)
+
         paths_as_path = [pathlib.Path(i) for i in file_paths]
         self.data_handler = DataHandler(paths_as_path)
 
