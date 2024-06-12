@@ -1,9 +1,10 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox
 from PySide6.QtGui import QStandardItemModel, QStandardItem
-
+from PySide6.QtWebEngineWidgets import QWebEngineView
 import sys, os, pod5, pathlib, datetime, uuid
 from typing import Dict, List, Any
 import numpy as np
+import plotly.graph_objects as go
 
 try:
     from help_strings import HELP
@@ -92,10 +93,8 @@ class DataHandler:
 
             if member == "signal_rows":
                 obj_dict[member] = self.process_signal_rows(member_value)
-            elif type(member_value) in [float, int, str, bool, dict, datetime.datetime, uuid.UUID]:
+            elif type(member_value) in [float, int, str, bool, dict, datetime.datetime, uuid.UUID, np.ndarray]:
                 obj_dict[member] = member_value
-            elif type(member_value) == np.ndarray:
-                obj_dict[member] = ", ".join([str(i) for i in member_value])
             else:
                 obj_dict[member] = self.members_to_dict(member_value)
 
@@ -178,6 +177,10 @@ class Pod5Viewer(QMainWindow):
         main_menu.addSeparator()
         main_menu.addAction("Exit", self.close)
 
+        view_menu = menubar.addMenu("View")
+        view_menu.addAction("Plot signal...", self.plot_signal)
+        view_menu.addAction("Plot pA signal...", self.plot_pa_signal)
+
         help_menu = menubar.addMenu("Help")
         help_menu.addAction("About", self.show_about)
 
@@ -195,6 +198,10 @@ class Pod5Viewer(QMainWindow):
 
         # right column to show data
         self.data_viewer = QTreeView()
+        # keeps track of the currently loaded data
+        self.data_viewer_data = None
+        # keepts track of the currently opened plot window
+        self.plot_window = None
 
         layout.addWidget(self.file_navigator, 1)
         layout.addWidget(self.data_viewer, 2)
@@ -283,8 +290,8 @@ class Pod5Viewer(QMainWindow):
             self.model.setHorizontalHeaderLabels(['Key', 'Value'])
             self.data_viewer.setModel(self.model)
 
-            data_viewer_data = self.data_handler.load_read_data(read_id_str)
-            self.populate_data_viewer(self.model.invisibleRootItem(), data_viewer_data)
+            self.data_viewer_data = self.data_handler.load_read_data(read_id_str)
+            self.populate_data_viewer(self.model.invisibleRootItem(), self.data_viewer_data)
             self.data_viewer.setColumnWidth(0, 230)
 
     def populate_data_viewer(self, parent: QStandardItem, data: Dict[str, Any], parent_keys: List[str] = []):
@@ -313,9 +320,102 @@ class Pod5Viewer(QMainWindow):
                 key_item.setEditable(False)
                 key_item.setToolTip(help_str)
 
-                value_item = QStandardItem(str(value))
+                if type(value) == np.ndarray:
+                    value_item = QStandardItem(", ".join([str(i) for i in value]))
+                else:
+                    value_item = QStandardItem(str(value))
+
                 parent.appendRow([key_item, value_item])
 
+    def plot_signal(self):
+        """
+        Plots the current signal in a new window.
+
+        This method checks if there is data available in the `data_viewer_data` attribute.
+        If data is available, it opens a new plot window with the signal corresponding to the current read ID.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+        if self.data_viewer_data:  
+            self.open_plot_window(str(self.data_viewer_data["read_id"]), self.data_viewer_data["signal"])
+
+    def plot_pa_signal(self):
+        """
+        Plots the current PA signal in a new window.
+
+        This method is responsible for plotting the current PA signal in a new window. 
+        It checks if the data viewer data is available and then opens a plot window with the PA signal. 
+        The plot window is identified by the read ID and the PA signal is passed as a parameter. 
+        The `in_pa` parameter is set to True to indicate that the signal being plotted is the PA signal.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+        if self.data_viewer_data:
+            self.open_plot_window(str(self.data_viewer_data["read_id"]), self.data_viewer_data["signal_pa"], in_pa=True)
+
+    def open_plot_window(self, id: str, data: np.ndarray, in_pa: bool = False):
+        """
+        Opens a new window to display a plot of the provided data.
+
+        Args:
+            id (str): The identifier for the plot window.
+            data (np.ndarray): The data to be plotted.
+            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. 
+                Defaults to False.
+
+        Returns:
+            None
+        """
+
+        if self.plot_window:
+            self.plot_window.close()
+
+        fig = go.Figure()
+        fig.update_layout(
+            template="seaborn",
+            title=id,
+            xaxis_title="Time point",
+            yaxis_title="Signal" if not in_pa else "Signal [pA]",
+            font=dict(family="Open sans, sans-serif", size=20),
+            plot_bgcolor="white",
+            margin=dict(l=50, r=50, t=50, b=50)
+        )
+        fig.update_xaxes(
+            showline=True,
+            linewidth=2,
+            linecolor='black',
+            mirror=True,
+            showticklabels=True,
+            ticks='outside',
+            showgrid=False,
+            tickwidth=2
+        )
+        fig.update_yaxes(
+            showline=True,
+            linewidth=2,
+            linecolor='black',
+            mirror=True,
+            showticklabels=True,
+            ticks='outside',
+            showgrid=False,
+            tickwidth=2
+        )
+        fig.add_trace(go.Scatter(y=data))
+
+        # create a new window to display the plot
+        self.plot_window = QMainWindow()
+        web_view = QWebEngineView(self.plot_window)
+        web_view.setHtml(fig.to_html(include_plotlyjs='cdn'))
+        self.plot_window.setCentralWidget(web_view)
+        self.plot_window.show()
 
 
 def main():
