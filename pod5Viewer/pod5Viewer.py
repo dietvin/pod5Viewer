@@ -73,6 +73,10 @@ class Pod5Viewer(QMainWindow):
         Sets up the window title, menu, layout, and widgets.
         """
         self.setWindowTitle("pod5Viewer")
+        self.setGeometry(100, 100, 800, 600)
+
+        # set up the dropdown menu in the top
+        menubar = self.menuBar()
 
         # set up the dropdown menu in the top
         menubar = self.menuBar()
@@ -534,6 +538,8 @@ class Pod5Viewer(QMainWindow):
             self.plot_window.close()
 
         self.plot_window = QMainWindow()
+        self.plot_window.setGeometry(100, 100, 800, 600)
+
         self.plot_window.setWindowTitle(f"{'Signal [pA]' if in_pa else 'Signal'}")
         web_view = QWebEngineView(self.plot_window)
         web_view.setHtml(fig)
