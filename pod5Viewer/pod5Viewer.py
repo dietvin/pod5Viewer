@@ -54,6 +54,10 @@ class Pod5Viewer(QMainWindow):
 
         Args:
             file_paths (List[str] | None): Optional list of file paths to be loaded at startup.
+                If provided, the files will be loaded automatically.
+
+        Returns:
+            None
         """
         super().__init__()
         self.init_ui()
@@ -118,7 +122,7 @@ class Pod5Viewer(QMainWindow):
 
         self.preview_tab = None
 
-        # keepts track of the currently opened plot window
+        # keeps track of the currently opened plot window
         self.plot_window = None
 
         layout.addWidget(self.file_navigator, 1)
@@ -205,6 +209,14 @@ class Pod5Viewer(QMainWindow):
 
 
     def on_tree_selection_changed(self) -> None:
+        """
+        Callback method triggered when the selection in the tree view changes.
+
+        This method updates the preview tab with the selected item.
+
+        Returns:
+            None
+        """
         selected_items = self.file_navigator.selectedItems()
         if selected_items:
             item = selected_items[0]
@@ -212,6 +224,15 @@ class Pod5Viewer(QMainWindow):
 
 
     def update_preview_tab(self, item: QTreeWidgetItem):
+        """
+        Updates the preview tab with the data corresponding to the selected item.
+
+        Args:
+            item (QTreeWidgetItem): The selected item in the tree widget.
+
+        Returns:
+            None
+        """
         if item.childCount() == 0:
             read_id = item.text(0)
 
@@ -226,15 +247,28 @@ class Pod5Viewer(QMainWindow):
 
 
     def add_proper_tab(self, item):
+        """
+        Adds a proper tab to the data tab viewer.
+
+        Parameters:
+        - item: The item to be added as a tab.
+
+        Returns:
+        None
+
+        Description:
+        - If the item has no child items, it is added as a proper tab to the data tab viewer.
+        - If a tab with the same item_id already exists, it is selected instead of adding a new tab.
+        - After adding a proper tab, the next selection should be a preview tab.
+        - The opened read data is stored in the opened_read_data dictionary.
+        """
         if item.childCount() == 0:
             read_id = item.text(0)
 
-            # After adding a proper tab, the next selection should again be a preview tab
             if self.preview_tab:
                 self.data_tab_viewer.removeTab(self.data_tab_viewer.indexOf(self.preview_tab))
                 self.preview_tab = None
 
-            # Check if a tab with the same item_id already exists
             for i in range(self.data_tab_viewer.count()):
                 if self.data_tab_viewer.tabText(i) == read_id:
                     self.data_tab_viewer.setCurrentIndex(i)
@@ -249,11 +283,20 @@ class Pod5Viewer(QMainWindow):
 
     def prepare_tab_data(self, read_id: str) -> Tuple[QTreeView, Dict[str, Any]]:
         """
-        Populates a data viewer with detailed data for the selected read ID.
+        Prepares the data for a tab in the pod5Viewer application.
 
         Args:
-            read_id (QTreeWidgetItem): The selected read ID item from the file navigator.
-        """        
+            read_id (str): The ID of the read data.
+
+        Returns:
+            Tuple[QTreeView, Dict[str, Any]]: A tuple containing the QTreeView widget and the loaded data.
+
+        Raises:
+            None
+
+        Example usage:
+            data_viewer, data_viewer_data = prepare_tab_data('read123')
+        """
         data_viewer = QTreeView()
         model = QStandardItemModel()
         model.setHorizontalHeaderLabels(['Key', 'Value'])
@@ -263,7 +306,7 @@ class Pod5Viewer(QMainWindow):
 
         data_viewer.setModel(model)
         data_viewer.setColumnWidth(0, 230)
-    
+
         return data_viewer, data_viewer_data
 
 
@@ -302,6 +345,15 @@ class Pod5Viewer(QMainWindow):
 
 
     def remove_tab(self, index: int) -> None:
+        """
+        Removes a tab from the data tab viewer and deletes the corresponding data from the opened_read_data dictionary.
+
+        Args:
+            index (int): The index of the tab to be removed.
+
+        Returns:
+            None
+        """
         del(self.opened_read_data[self.data_tab_viewer.tabText(index)])
         self.data_tab_viewer.removeTab(index)
 
@@ -311,11 +363,11 @@ class Pod5Viewer(QMainWindow):
 
     def export_current_read(self) -> None:
         """
-        Exports the current read data to a YAML file.
+        Export the current read to a selected directory.
 
-        This method prompts the user to select a directory to save the exported data.
-        It then constructs a file path using the selected directory and the current read ID.
-        The signal data is transformed to comma-separated strings and written to the file in YAML format.
+        This method prompts the user to select a directory and exports the current read
+        to that directory. The current read is determined by the currently selected tab
+        in the data_tab_viewer.
 
         Returns:
             None
@@ -334,6 +386,16 @@ class Pod5Viewer(QMainWindow):
 
 
     def export_all_opened_reads(self) -> None:
+        """
+        Export all opened reads to the specified directory.
+
+        This method prompts the user to select a directory and exports the data of
+        all opened reads to that directory. Each read is exported using the 
+        `export_read` method.
+
+        Returns:
+            None
+        """
         if self.data_tab_viewer.count() > 0:
             # Prompt the user to select a directory
             dialog = QFileDialog(self, "Export Current Read")
@@ -348,6 +410,16 @@ class Pod5Viewer(QMainWindow):
         
 
     def export_read(self, directory: str, read_id: str) -> None:
+        """
+        Export the data of a specific read to a YAML file.
+
+        Args:
+            directory (str): The directory where the YAML file will be saved.
+            read_id (str): The ID of the read to export.
+
+        Returns:
+            None
+        """
         file_path = os.path.join(directory, f"{read_id}.yaml")
         if read_id in self.opened_read_data.keys():
             transformed_data = self.transform_data(self.opened_read_data[read_id])
@@ -375,6 +447,16 @@ class Pod5Viewer(QMainWindow):
 
 
     def plot_signal(self, in_pa: bool = False, single: bool = True) -> None:
+        """
+        Plots the signal data for the selected read(s) and opens a new window to display the plot.
+
+        Args:
+            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. Defaults to False.
+            single (bool, optional): Indicates whether to plot the signal for a single read or all opened reads. Defaults to True.
+
+        Returns:
+            None
+        """
         if self.data_tab_viewer.count() > 0:
             if single:
                 read_ids = [self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())]
@@ -385,10 +467,24 @@ class Pod5Viewer(QMainWindow):
             self.open_plot_window(fig, in_pa=in_pa)
 
     def create_plot(self, read_ids: List[str], in_pa: bool = False, single: bool = True) -> str:
+        """
+        Creates a plot of the signal data for the specified read(s).
+
+        Args:
+            read_ids (List[str]): The ID(s) of the read(s) to plot.
+            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. Defaults to False.
+            single (bool, optional): Indicates whether to plot the signal for a single read or all opened reads. Defaults to True.
+
+        Returns:
+            str: The HTML representation of the plot.
+
+        Example usage:
+            fig = create_plot(['read123'], in_pa=True, single=True)
+        """
         fig = go.Figure()
         fig.update_layout(
             template="seaborn",
-            title= read_ids[0] if single else "Current signals of all opened reads",
+            title=read_ids[0] if single else "Current signals of all opened reads",
             xaxis_title="Time point",
             yaxis_title="Signal" if not in_pa else "Signal [pA]",
             font=dict(family="Open sans, sans-serif", size=20),
@@ -428,10 +524,8 @@ class Pod5Viewer(QMainWindow):
         Opens a new window to display a plot of the provided data.
 
         Args:
-            id (str): The identifier for the plot window.
-            data (np.ndarray): The data to be plotted.
-            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. 
-                Defaults to False.
+            fig (str): The HTML representation of the plot.
+            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. Defaults to False.
 
         Returns:
             None
