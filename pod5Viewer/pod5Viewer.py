@@ -61,7 +61,7 @@ class DataHandler:
                                  [self.dataset_reader.get_reader(file).read_ids for file in file_paths]))
         return id_path_dict
     
-    def load_read_data(self, read_id: str):
+    def load_read_data(self, read_id: str) -> Dict[str, Any]:
         """
         Loads data for a specified read ID and converts it to a dictionary.
 
@@ -149,7 +149,7 @@ class Pod5Viewer(QMainWindow):
             Recursively populates the data viewer with hierarchical data.
     """
 
-    def __init__(self, file_paths: List[str]|None = None):
+    def __init__(self, file_paths: List[str]|None = None) -> None:
         """
         Initializes the Pod5Viewer application.
 
@@ -162,7 +162,7 @@ class Pod5Viewer(QMainWindow):
         if file_paths:
             self.load_files(file_paths)
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         """
         Initializes the user interface elements of the Pod5Viewer.
         Sets up the window title, menu, layout, and widgets.
@@ -177,6 +177,8 @@ class Pod5Viewer(QMainWindow):
         main_menu.addSeparator()
         main_menu.addAction("Export current read...", self.export_current_read)
         main_menu.addSeparator()
+        main_menu.addAction("Clear", self.clear_viewer)
+        main_menu.addSeparator()        
         main_menu.addAction("Exit", self.close)
 
         view_menu = menubar.addMenu("View")
@@ -216,7 +218,7 @@ class Pod5Viewer(QMainWindow):
         self.about_dialog.setText(about_text)
         self.about_dialog.exec()
 
-    def select_files(self):
+    def select_files(self) -> None:
         """
         Opens a file dialog to select one or more POD5 files.
         Loads the selected files into the application.
@@ -246,7 +248,7 @@ class Pod5Viewer(QMainWindow):
                 if len(pod5_files) > 0:
                     self.load_files(pod5_files)
 
-    def load_files(self, file_paths: List[str]):
+    def load_files(self, file_paths: List[str]) -> None:
         """
         Loads the specified POD5 files and updates the file navigator with their read IDs.
 
@@ -283,7 +285,7 @@ class Pod5Viewer(QMainWindow):
         
         self.file_navigator.itemClicked.connect(self.fill_data_viewer)
 
-    def fill_data_viewer(self, read_id):
+    def fill_data_viewer(self, read_id) -> None:
         """
         Populates the data viewer with detailed data for the selected read ID.
 
@@ -334,7 +336,7 @@ class Pod5Viewer(QMainWindow):
 
                 parent.appendRow([key_item, value_item])
 
-    def export_current_read(self):
+    def export_current_read(self) -> None:
         """
         Exports the current read data to a YAML file.
 
@@ -397,7 +399,7 @@ class Pod5Viewer(QMainWindow):
         if self.data_viewer_data:  
             self.open_plot_window(str(self.data_viewer_data["read_id"]), self.data_viewer_data["signal"])
 
-    def plot_pa_signal(self):
+    def plot_pa_signal(self) -> None:
         """
         Plots the current PA signal in a new window.
 
@@ -466,10 +468,21 @@ class Pod5Viewer(QMainWindow):
 
         # create a new window to display the plot
         self.plot_window = QMainWindow()
+        self.plot_window.setWindowTitle(f"{'Signal [pA]' if in_pa else 'Signal'} - {id}")
         web_view = QWebEngineView(self.plot_window)
         web_view.setHtml(fig.to_html(include_plotlyjs='cdn'))
         self.plot_window.setCentralWidget(web_view)
         self.plot_window.show()
+
+    def clear_viewer(self) -> None:
+        """
+        Clears the data viewer by setting the model to an empty QStandardItemModel.
+        """
+        self.model = QStandardItemModel()
+        self.data_viewer.setModel(self.model)
+        self.data_viewer_data = None
+        self.plot_window = None
+        self.file_navigator.clear()
 
 
 def main():
