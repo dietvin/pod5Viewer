@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget
-from PySide6.QtGui import QStandardItemModel, QStandardItem
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QKeySequence, QShortcut, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
-import sys, os, pod5, pathlib, datetime, uuid, yaml
+import sys, os, pathlib, yaml
 from typing import Dict, List, Any, Tuple
 import numpy as np
 import plotly.graph_objects as go
@@ -61,7 +61,7 @@ class Pod5Viewer(QMainWindow):
         """
         super().__init__()
         self.init_ui()
-
+        self.init_shortcuts()
         self.opened_read_data = {}
 
         if file_paths:
@@ -75,12 +75,15 @@ class Pod5Viewer(QMainWindow):
         self.setWindowTitle("pod5Viewer")
         self.setGeometry(100, 100, 800, 600)
 
+        self.icon = QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)), "icon.png"))
+        self.setWindowIcon(self.icon)
+
         # set up the dropdown menu in the top
         menubar = self.menuBar()
 
         # set up the dropdown menu in the top
         menubar = self.menuBar()
-        main_menu = menubar.addMenu("File")
+        main_menu = menubar.addMenu("&File")
         main_menu.addAction("Open file(s)...", self.select_files)
         main_menu.addAction("Open directory...", self.select_directory)
         main_menu.addSeparator()
@@ -91,7 +94,7 @@ class Pod5Viewer(QMainWindow):
         main_menu.addSeparator()        
         main_menu.addAction("Exit", self.close)
 
-        view_menu = menubar.addMenu("View")
+        view_menu = menubar.addMenu("&View")
 
         view_signal_menu = view_menu.addMenu("Signal...")
         view_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(single=True))
@@ -101,10 +104,14 @@ class Pod5Viewer(QMainWindow):
         view_pa_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(in_pa=True, single=True))
         view_pa_signal_menu.addAction("All open reads...", lambda: self.plot_signal(in_pa=True, single=False))
 
-        help_menu = menubar.addMenu("Help")
+        help_menu = menubar.addMenu("&Help")
+        help_menu.addAction("Shortcuts", self.show_shortcuts)
+        help_menu.addSeparator()
         help_menu.addAction("About", self.show_about)
 
-        self.about_dialog = QMessageBox()
+
+        self.info_dialog = QMessageBox()
+        self.info_dialog.setWindowIcon(self.icon)
 
         # create the layout
         layout = QHBoxLayout()
@@ -132,15 +139,115 @@ class Pod5Viewer(QMainWindow):
         layout.addWidget(self.file_navigator, 1)
         layout.addWidget(self.data_tab_viewer, 2)
 
+    def init_shortcuts(self) -> None:
+        """
+        Initializes keyboard shortcuts for the Pod5Viewer application.
+
+        Shortcut List:
+        - Ctrl+O: Open file(s)
+        - Ctrl+D: Open directory
+        - Ctrl+S: Export current read
+        - Ctrl+A: Export all opened reads
+        - Ctrl+Backspace: Clear viewer
+        - Ctrl+Q: Exit application
+        - Tab: Switch between file navigator and data viewer
+        - Ctrl+Tab: Cycle through tabs in the data viewer
+        - Ctrl+W: Close the current tab in the data viewer
+        """
+        # Ctrl+O: Open file(s)
+        open_files_shortcut = QShortcut(QKeySequence("Ctrl+O"), self)
+        open_files_shortcut.activated.connect(self.select_files)
+        # Ctrl+D: Open directory
+        open_directory_shortcut = QShortcut(QKeySequence("Ctrl+D"), self)
+        open_directory_shortcut.activated.connect(self.select_directory)
+        # Ctrl+S: Export current read
+        export_current_read_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
+        export_current_read_shortcut.activated.connect(self.export_current_read)
+        # Ctrl+A: Export all opened reads
+        export_all_opened_reads_shortcut = QShortcut(QKeySequence("Ctrl+A"), self)
+        export_all_opened_reads_shortcut.activated.connect(self.export_all_opened_reads)
+        # Ctrl+Backspace: Clear viewer
+        clear_viewer_shortcut = QShortcut(QKeySequence("Ctrl+Backspace"), self)
+        clear_viewer_shortcut.activated.connect(self.clear_viewer)
+        # Ctrl+Q: Exit application
+        exit_shortcut = QShortcut(QKeySequence("Ctrl+Q"), self)
+        exit_shortcut.activated.connect(self.close)
+        # Tab to switch between file navigator and data viewer
+        tab_shortcut = QShortcut(QKeySequence("Tab"), self)
+        tab_shortcut.activated.connect(self.__shortcut_switch_focus)
+        # Ctrl+Tab to cycle through tabs in the data viewer
+        tab_cycle_shortcut = QShortcut(QKeySequence("Ctrl+Tab"), self)
+        tab_cycle_shortcut.activated.connect(self.__shortcut_cycle_reads)
+        # Ctrl+W to close the current tab in the data viewer
+        close_tab_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
+        close_tab_shortcut.activated.connect(self.__shortcut_close_tab)
+
+
+    def __shortcut_switch_focus(self) -> None:
+        """
+        Switches the focus between the file navigator and the data viewer.
+        """
+        if self.file_navigator.hasFocus():
+            if self.data_tab_viewer.currentWidget() is not None:
+                self.data_tab_viewer.currentWidget().setFocus()
+        else:
+            self.file_navigator.setFocus()
+
+
+    def __shortcut_cycle_reads(self) -> None:
+        if self.data_tab_viewer.count() > 0:
+            self.data_tab_viewer.setCurrentIndex((self.data_tab_viewer.currentIndex() + 1) % self.data_tab_viewer.count())
+    
+
+    def __shortcut_close_tab(self) -> None:
+        if self.data_tab_viewer.count() > 0:
+            self.remove_tab(self.data_tab_viewer.currentIndex())
+
 
     def show_about(self):
         """
         Displays a message box with information about the application.
         """
-        about_text = f'<center><b>pod5view</b><br>v{__version__}</center><br><br>Author: Vincent Dietrich<br>Github: <a href="https://github.com/dietvin/pod5Viewer">https://github.com/dietvin/pod5Viewer</a></center>'
-        self.about_dialog.setText(about_text)
-        self.about_dialog.exec()
+        about_text = f"""<center>
+                            <b>pod5view</b>
+                            <br>v{__version__}
+                        </center>
+                        <br>
+                        <br>Author: Vincent Dietrich
+                        <br>Github: <a href="https://github.com/dietvin/pod5Viewer">https://github.com/dietvin/pod5Viewer</a>
+                        """
+        self.info_dialog.setText(about_text)
+        self.info_dialog.setWindowTitle("About pod5Viewer")
+        self.info_dialog.exec()
 
+    def show_shortcuts(self):
+        """
+        Displays a message box with information about the available shortcuts.
+        """
+        shortcuts_text = f"""<center>
+                                <b>Shortcuts</b>
+                            </center>
+                            <b>File</b>
+                                <br>Ctrl+O: Open file(s)
+                                <br>Ctrl+D: Open directory
+                                <br>Ctrl+S: Export current read
+                                <br>Ctrl+A: Export all opened reads
+                                <br>Ctrl+Backspace: Clear viewer
+                                <br>Ctrl+Q: Exit application
+                                <br>
+                            <br><b>Navigation</b>
+                                <br>Tab: Switch between file navigator and data viewer
+                                <br>Ctrl+Tab: Cycle through tabs in the data viewer
+                                <br>Ctrl+W: Close the current tab in the data viewer
+                                <br>
+                            <br><b>Menu navigation</b>
+                                <br>Alt & F: Open the file menu
+                                <br>Alt & V: Open the view menu
+                                <br>Alt & H: Open the help menu
+                            """
+        self.info_dialog.setText(shortcuts_text)
+        self.info_dialog.setWindowTitle("Shortcuts")
+        self.info_dialog.exec()
 
     def select_files(self) -> None:
         """
@@ -539,8 +646,13 @@ class Pod5Viewer(QMainWindow):
 
         self.plot_window = QMainWindow()
         self.plot_window.setGeometry(100, 100, 800, 600)
-
+        self.plot_window.setWindowIcon(self.icon)
+        # Create shortcut for closing window
+        shortcut = QShortcut(QKeySequence("CTRL+Q"), self.plot_window)
+        shortcut.activated.connect(self.plot_window.close)
+        
         self.plot_window.setWindowTitle(f"{'Signal [pA]' if in_pa else 'Signal'}")
+        
         web_view = QWebEngineView(self.plot_window)
         web_view.setHtml(fig)
         self.plot_window.setCentralWidget(web_view)
