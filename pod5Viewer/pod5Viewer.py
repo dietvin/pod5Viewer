@@ -75,7 +75,7 @@ class Pod5Viewer(QMainWindow):
         self.setWindowTitle("pod5Viewer")
         self.setGeometry(100, 100, 800, 600)
 
-        self.icon = QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)), "icon.ico"))
+        self.icon = QIcon(self.__resource_path("icon.ico"))
         self.setWindowIcon(self.icon)
 
         # set up the dropdown menu in the top
@@ -139,6 +139,15 @@ class Pod5Viewer(QMainWindow):
 
         layout.addWidget(self.file_navigator, 1)
         layout.addWidget(self.data_tab_viewer, 2)
+
+    def __resource_path(self, relative_path) -> str:
+        """ Get the absolute path to a resource, works for dev and for PyInstaller """
+        if hasattr(sys, '_MEIPASS'):
+            # When running in a PyInstaller bundle, the _MEIPASS attribute is set.
+            base_path = getattr(sys, "_MEIPASS")
+        else:
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
 
     def init_shortcuts(self) -> None:
         """
