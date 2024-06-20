@@ -626,7 +626,7 @@ class Pod5Viewer(QMainWindow):
 
         for read_id in read_ids:
             data = self.opened_read_data[read_id]["signal" if not in_pa else "signal_pa"]
-            fig.add_trace(go.Scatter(y=data, name=read_id))
+            fig.add_trace(go.Scatter(y=data, name=read_id, hovertemplate="Signal: %{y:.2f}<br>Time point: %{x}"))
 
         return fig.to_html(include_plotlyjs='cdn')
 
