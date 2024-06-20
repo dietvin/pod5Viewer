@@ -75,7 +75,7 @@ class Pod5Viewer(QMainWindow):
         self.setWindowTitle("pod5Viewer")
         self.setGeometry(100, 100, 800, 600)
 
-        self.icon = QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)), "icon.png"))
+        self.icon = QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)), "icon.ico"))
         self.setWindowIcon(self.icon)
 
         # set up the dropdown menu in the top
