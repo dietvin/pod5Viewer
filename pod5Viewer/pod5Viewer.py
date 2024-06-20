@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QKeySequence, QShortcut, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
-import sys, os, pathlib, yaml
+import sys, os, pathlib, yaml, traceback
 from typing import Dict, List, Any, Tuple
 import numpy as np
 import plotly.graph_objects as go
@@ -87,8 +87,9 @@ class Pod5Viewer(QMainWindow):
         main_menu.addAction("Open file(s)...", self.select_files)
         main_menu.addAction("Open directory...", self.select_directory)
         main_menu.addSeparator()
-        main_menu.addAction("Export current read...", self.export_current_read)
-        main_menu.addAction("Export all opened reads...", self.export_all_opened_reads)
+        export_menu = main_menu.addMenu("Export")
+        export_menu.addAction("Export current read...", self.export_current_read)
+        export_menu.addAction("Export all opened reads...", self.export_all_opened_reads)
         main_menu.addSeparator()
         main_menu.addAction("Clear", self.clear_viewer)
         main_menu.addSeparator()        
@@ -485,7 +486,7 @@ class Pod5Viewer(QMainWindow):
         """
         if self.data_tab_viewer.count() > 0:
             # Prompt the user to select a directory
-            dialog = QFileDialog(self, "Export Current Read")
+            dialog = QFileDialog(self, "Export current read")
             dialog.setFileMode(QFileDialog.Directory)
             dialog.setOption(QFileDialog.ShowDirsOnly, True)
 
@@ -509,7 +510,7 @@ class Pod5Viewer(QMainWindow):
         """
         if self.data_tab_viewer.count() > 0:
             # Prompt the user to select a directory
-            dialog = QFileDialog(self, "Export Current Read")
+            dialog = QFileDialog(self, "Export all opened reads")
             dialog.setFileMode(QFileDialog.Directory)
             dialog.setOption(QFileDialog.ShowDirsOnly, True)
 
@@ -669,10 +670,36 @@ class Pod5Viewer(QMainWindow):
         self.file_navigator.clear()
 
 
+def error_handler(exc_type, exc_value, exc_traceback) -> None:
+    """
+    Handle and display an error message dialog.
+
+    Parameters:
+    - exc_type (type): The type of the exception.
+    - exc_value (Exception): The exception instance.
+    - exc_traceback (traceback): The traceback object.
+
+    Returns:
+    None
+
+    This function displays an error message dialog with the details of the exception.
+    It takes the exception type, exception instance, and traceback as input parameters.
+    The error message dialog shows the error message and provides a detailed text with the traceback information.
+    """
+    error_message = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+    error_dialog = QMessageBox()
+    error_dialog.setWindowTitle("An error occurred.")
+    error_dialog.setText("An unexpected error occurred. For support, open an Issue on the pod5Viewer Github page with the error message.")
+    error_dialog.setDetailedText(error_message)
+    error_dialog.exec()
+ 
+
 def main():
     app = QApplication(sys.argv)
 
     file_paths = sys.argv[1:] if len(sys.argv) > 1 else None
+
+    sys.excepthook = error_handler
 
     window = Pod5Viewer(file_paths)
     window.show()
