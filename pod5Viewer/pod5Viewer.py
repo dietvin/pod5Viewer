@@ -148,7 +148,7 @@ class Pod5Viewer(QMainWindow):
             # When running in a PyInstaller bundle, the _MEIPASS attribute is set.
             base_path = getattr(sys, "_MEIPASS")
         else:
-            base_path = os.path.dirname(os.path.realpath(__file__))
+            base_path = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
         return os.path.join(base_path, relative_path)
 
     def init_shortcuts(self) -> None:
@@ -220,10 +220,9 @@ class Pod5Viewer(QMainWindow):
         """
         Displays a message box with information about the application.
         """
-        about_text = f"""<center>
-                            <b>pod5view</b>
-                            <br>v{__version__}
-                        </center>
+        about_text = f"""
+                        <b>pod5Viewer</b>
+                        <br>v{__version__}
                         <br>
                         <br>Author: Vincent Dietrich
                         <br>Github: <a href="https://github.com/dietvin/pod5Viewer">https://github.com/dietvin/pod5Viewer</a>
