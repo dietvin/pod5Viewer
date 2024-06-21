@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QVBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget, QTextBrowser, QLabel
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QKeySequence, QShortcut, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 import sys, os, pathlib, yaml, traceback
@@ -73,8 +73,7 @@ class Pod5Viewer(QMainWindow):
         Sets up the window title, menu, layout, and widgets.
         """
         self.setWindowTitle("pod5Viewer")
-        self.setGeometry(100, 100, 800, 600)
-
+        self.setGeometry(100, 100, 1200, 800)
         self.icon = QIcon(self.__resource_path("icon.ico"))
         self.setWindowIcon(self.icon)
 
@@ -97,13 +96,17 @@ class Pod5Viewer(QMainWindow):
 
         view_menu = menubar.addMenu("&View")
 
-        view_signal_menu = view_menu.addMenu("Signal...")
-        view_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(single=True))
-        view_signal_menu.addAction("All open reads...", lambda: self.plot_signal(single=False))
+        view_signal_menu = view_menu.addMenu("View signal...")
+        view_signal_menu.addAction("View full signal data...", lambda: self.show_full_signal(in_pa=False))
+        view_signal_menu.addAction("View full signal pA data...", lambda: self.show_full_signal(in_pa=False))
 
-        view_pa_signal_menu = view_menu.addMenu("pA signal...")
-        view_pa_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(in_pa=True, single=True))
-        view_pa_signal_menu.addAction("All open reads...", lambda: self.plot_signal(in_pa=True, single=False))
+        plot_signal_menu = view_menu.addMenu("Plot signal...")
+        plot_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(single=True))
+        plot_signal_menu.addAction("All open reads...", lambda: self.plot_signal(single=False))
+
+        plot_pa_signal_menu = view_menu.addMenu("Plot pA signal...")
+        plot_pa_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(in_pa=True, single=True))
+        plot_pa_signal_menu.addAction("All open reads...", lambda: self.plot_signal(in_pa=True, single=False))
 
         help_menu = menubar.addMenu("&Help")
         help_menu.addAction("Shortcuts", self.show_shortcuts)
@@ -135,6 +138,7 @@ class Pod5Viewer(QMainWindow):
         self.preview_tab = None
 
         # keeps track of the currently opened plot window
+        self.data_view_window = None
         self.plot_window = None
 
         layout.addWidget(self.file_navigator, 1)
@@ -424,7 +428,7 @@ class Pod5Viewer(QMainWindow):
         model.setHorizontalHeaderLabels(['Key', 'Value'])
 
         data_viewer_data = self.data_handler.load_read_data(read_id)
-        self.populate_tree_model(model.invisibleRootItem(), data_viewer_data)
+        self.populate_tree_model(model.invisibleRootItem(), self.transform_data(data_viewer_data))
 
         data_viewer.setModel(model)
         data_viewer.setColumnWidth(0, 230)
@@ -562,10 +566,68 @@ class Pod5Viewer(QMainWindow):
         transformed_data = {}
         for key, value in data.items():
             if key == "signal" or key == "signal_pa":
-                transformed_data[key] = ",".join(str(x) for x in value)
+                num_values = 100
+                if len(value) > num_values:
+                    transformed_data[key] = ",".join(str(x) for x in value[:num_values]) + "..."
+                else:
+                    transformed_data[key] = ",".join(str(x) for x in value)
             else:
                 transformed_data[key] = value
         return transformed_data
+
+    def show_full_signal(self, in_pa: bool = False) -> None:
+        """
+        Displays the full signal data for the selected read(s) in a new window.
+
+        Args:
+            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. Defaults to False.
+
+        Returns:
+            None
+        """
+        if self.data_tab_viewer.count() > 0:
+            read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
+            self.open_full_signal_window(read_id, in_pa=in_pa)
+
+    def open_full_signal_window(self, read_id: str, in_pa: bool = False) -> None:
+        """
+        Opens a new window to display the full signal data for the selected read.
+
+        Args:
+            read_id (str): The ID of the read to display.
+            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. Defaults to False.
+
+        Returns:
+            None
+        """
+        if self.data_view_window:
+            self.data_view_window.close()
+
+        self.data_view_window = QMainWindow()
+        self.data_view_window.setGeometry(100, 100, 800, 600)
+        self.data_view_window.setWindowIcon(self.icon)
+        # Create shortcut for closing window
+        shortcut = QShortcut(QKeySequence("CTRL+Q"), self.data_view_window)
+        shortcut.activated.connect(self.data_view_window.close)
+        
+        self.data_view_window.setWindowTitle(f"{'Signal [pA]' if in_pa else 'Signal'}")
+
+        # TODO: Somehow show the data only partially. Maybe some sort of scroll element that shows only x number of data points at a time
+        data = self.opened_read_data[read_id]["signal" if not in_pa else "signal_pa"]
+        data = ",".join(str(x) for x in data)
+
+        read_id_label = QLabel(f"Read ID: {read_id}")
+        data_viewer = QTextBrowser()
+        data_viewer.setText(data)
+
+        layout = QVBoxLayout()
+        layout.addWidget(read_id_label)
+        layout.addWidget(data_viewer)
+        container = QWidget()
+        container.setLayout(layout)
+
+        self.data_view_window.setCentralWidget(container)
+        self.data_view_window.show()
 
 
     def plot_signal(self, in_pa: bool = False, single: bool = True) -> None:
