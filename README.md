@@ -75,7 +75,11 @@ For clearing both file navigator and data view panel, select `Clear` in the `Fil
 ### Viewing, plotting and export
 Current signals of either all opened reads or only the currently focused read can be viewed and plotted via the `View` menu. For viewing the measurements select an option in the `View signal...` submenu. This shows individual current measurements (in pA if selected) of the currently focussed reads in bins of 100 values. The scroll bar is used to scroll through the bins. 
 
-Signals can be plotted via the `Plot signal...` or `Plot pA signal...` submenu. Depending on which option is selected, the current signal (in pA) is shown for the currently focussed read (`Focussed read...`) or all currently opened reads (`All open reads...`). This opens a new Window containing an interactive Plotly figure, allowing for zooming and panning. The figure can also be exported to a PNG file. When plotting multiple signals, individual signals can be hidden by clicking the read-id in the legend.
+Signals can be plotted via the `Plot signal...`, `Plot pA signal...` or `Plot normalized signal...` submenu. Depending on which option is selected, the (normalized) current signal (in pA) is shown for the currently focussed read (`Focussed read...`) or all currently opened reads (`All open reads...`). This opens a new Window containing an interactive Plotly figure, allowing for zooming and panning. The figure can also be exported to a PNG file. When plotting multiple signals, individual signals can be hidden by clicking the read-id in the legend.
+
+If the normalized signal is chosen for plotting, the standard score is calculated for each current value by subtracting the mean current value of the given read and dividing by the standard deviation. 
+
+Due to limitations of the Plotly framework when displaying large amounts of data, the signals get downsampled if a read has more than 10000 measurements. For downsampling, the measurements get binned into 10000 subsets, from each of which the median is calculated to represent the subset in the downsampled array. Downsampled measurements are indicated by a dotted line in the figure.
 
 Either all opened reads (`Export all opened reads...`) or only the currently focused one (`Export current read...`) can be exported to YAML format using the `Export` submenu in the `File` menu. When exporting, the user selects an output directory in the file browser, in which a YAML file is created for each exported read with the read-id as the file name.
 
