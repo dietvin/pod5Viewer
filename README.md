@@ -10,6 +10,22 @@ For Windows systems the pod5Viewer can be installed conveniently via the install
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
+#### Important Note
+For Windows 11 systems, Windows Security falsely flags the pod5Viewer EXE as a virus:
+```
+Trojan:Win32/Phonzy.B!ml
+
+Alert level: Severe
+Category: Trojan
+Details: This program is dangerous and executes commands from an attacker.
+```
+For more details see summary by Microsoft [here](https://go.microsoft.com/fwlink/?linkid=142185&name=Trojan:Win32/Phonzy.B!ml&threatid=2147772963).
+
+One option to still use the pod5Viewer is to allow the execution in the `Virus & threat protection` menu in the Security settings. 
+
+**We already submitted the pod5Viewer for malware analysis to Microsoft to be whitelisted soon.**
+
+
 ### Ubuntu
 For Ubuntu systems the pod5Viewer can be installed from a DEB file using apt. For this download the DEB file from the following link:
 
@@ -55,8 +71,10 @@ Some attributes in read entries contain nested data. The attributes can be expan
 
 For clearing both file navigator and data view panel, select `Clear` in the `File` menu. The `Exit` option in the `File` menu closes the pod5Viewer.
 
-### Plotting and export
-Current signals of either all opened reads or only the currently focused read can be plotted via the `View` menu. Depending on which option is selected, the current signal (in pA) is shown for the currently focussed read (`Focussed read...`) or all currently opened reads (`All open reads...`). This opens a new Window containing an interactive Plotly figure, allowing for zooming and panning. The figure can also be exported to a PNG file. When plotting multiple signals, individual signals can be hidden by clicking the read-id in the legend.
+### Viewing, plotting and export
+Current signals of either all opened reads or only the currently focused read can be viewed and plotted via the `View` menu. For viewing the measurements select an option in the `View signal...` submenu. This shows individual current measurements (in pA if selected) of the currently focussed reads in bins of 100 values. The scroll bar is used to scroll through the bins. 
+
+Signals can be plotted via the `Plot signal...` or `Plot pA signal...` submenu. Depending on which option is selected, the current signal (in pA) is shown for the currently focussed read (`Focussed read...`) or all currently opened reads (`All open reads...`). This opens a new Window containing an interactive Plotly figure, allowing for zooming and panning. The figure can also be exported to a PNG file. When plotting multiple signals, individual signals can be hidden by clicking the read-id in the legend.
 
 Either all opened reads (`Export all opened reads...`) or only the currently focused one (`Export current read...`) can be exported to YAML format using the `Export` submenu in the `File` menu. When exporting, the user selects an output directory in the file browser, in which a YAML file is created for each exported read with the read-id as the file name.
 
@@ -79,6 +97,12 @@ Menu navigation:
 - Alt & F: Open the file menu
 - Alt & V: Open the view menu
 - Alt & H: Open the help menu
+
+View signal window:
+- Pagedown: Scroll down (large steps)
+- Pageup: Scroll up (large steps)
+- Arrow down: Scroll down
+- Arrow up: Scroll up
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
