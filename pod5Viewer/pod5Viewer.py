@@ -3,7 +3,6 @@ from PySide6.QtGui import QStandardItemModel, QStandardItem, QKeySequence, QShor
 import sys, os, pathlib, yaml, traceback
 from typing import Dict, List, Any, Tuple
 import numpy as np
-import plotly.graph_objects as go
 
 try:
     from help_strings import HELP
@@ -114,6 +113,11 @@ class Pod5Viewer(QMainWindow):
         plot_pa_signal_menu = view_menu.addMenu("Plot pA signal...")
         plot_pa_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(in_pa=True, single=True))
         plot_pa_signal_menu.addAction("All open reads...", lambda: self.plot_signal(in_pa=True, single=False))
+
+        plot_norm_signal_menu = view_menu.addMenu("Plot normalized signal...")
+        plot_norm_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(single=True, norm=True))
+        plot_norm_signal_menu.addAction("All open reads...", lambda: self.plot_signal(single=False, norm=True))
+
 
         help_menu = menubar.addMenu("&Help")
         help_menu.addAction("Shortcuts", self.show_shortcuts)
@@ -619,29 +623,16 @@ class Pod5Viewer(QMainWindow):
         """
         if self.data_tab_viewer.count() > 0:
             read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
-            self.open_full_signal_window(read_id, in_pa=in_pa)
 
-    def open_full_signal_window(self, read_id: str, in_pa: bool = False) -> None:
-        """
-        Opens a new window to display the full signal data for the selected read.
+            if self.data_view_window:
+                self.data_view_window.close()
 
-        Args:
-            read_id (str): The ID of the read to display.
-            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. Defaults to False.
+            data = self.opened_read_data[read_id]["signal" if not in_pa else "signal_pa"]
+            self.data_view_window = ArrayTableViewer(data, read_id=read_id, in_pa=in_pa)
+            self.data_view_window.setWindowIcon(self.icon)
+            self.data_view_window.show()
 
-        Returns:
-            None
-        """
-        if self.data_view_window:
-            self.data_view_window.close()
-
-        data = self.opened_read_data[read_id]["signal" if not in_pa else "signal_pa"]
-        self.data_view_window = ArrayTableViewer(data, read_id=read_id, in_pa=in_pa)
-        self.data_view_window.setWindowIcon(self.icon)
-        self.data_view_window.show()
-
-
-    def plot_signal(self, in_pa: bool = False, single: bool = True) -> None:
+    def plot_signal(self, in_pa: bool = False, single: bool = True, norm: bool = False) -> None:
         """
         Plots the signal data for the selected read(s) and opens a new window to display the plot.
 
@@ -658,80 +649,16 @@ class Pod5Viewer(QMainWindow):
             else:
                 read_ids = [self.data_tab_viewer.tabText(i) for i in range(self.data_tab_viewer.count())]
 
-            fig = self.create_plot(read_ids, in_pa=in_pa, single=single)
-            self.open_plot_window(fig, in_pa=in_pa)
+            plot_data = {}
+            for read_id in read_ids:
+                plot_data[read_id] = self.opened_read_data[read_id]["signal" if not in_pa else "signal_pa"]
 
-
-    def create_plot(self, read_ids: List[str], in_pa: bool = False, single: bool = True) -> str:
-        """
-        Creates a plot of the signal data for the specified read(s).
-
-        Args:
-            read_ids (List[str]): The ID(s) of the read(s) to plot.
-            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. Defaults to False.
-            single (bool, optional): Indicates whether to plot the signal for a single read or all opened reads. Defaults to True.
-
-        Returns:
-            str: The HTML representation of the plot.
-
-        Example usage:
-            fig = create_plot(['read123'], in_pa=True, single=True)
-        """
-        fig = go.Figure()
-        fig.update_layout(
-            template="seaborn",
-            title=read_ids[0] if single else "Current signals of all opened reads",
-            xaxis_title="Time point",
-            yaxis_title="Signal" if not in_pa else "Signal [pA]",
-            font=dict(family="Open sans, sans-serif", size=20),
-            plot_bgcolor="white",
-            margin=dict(l=50, r=50, t=50, b=50)
-        )
-        fig.update_xaxes(
-            showline=True,
-            linewidth=2,
-            linecolor='black',
-            mirror=True,
-            showticklabels=True,
-            ticks='outside',
-            showgrid=False,
-            tickwidth=2
-        )
-        fig.update_yaxes(
-            showline=True,
-            linewidth=2,
-            linecolor='black',
-            mirror=True,
-            showticklabels=True,
-            ticks='outside',
-            showgrid=False,
-            tickwidth=2
-        )
-
-        for read_id in read_ids:
-            data = self.opened_read_data[read_id]["signal" if not in_pa else "signal_pa"]
-            fig.add_trace(go.Scatter(y=data, name=read_id, hovertemplate="Signal: %{y:.2f}<br>Time point: %{x}"))
-
-        return fig.to_html(include_plotlyjs="cdn")
-
-
-    def open_plot_window(self, fig: str, in_pa: bool = False) -> None:
-        """
-        Opens a plot window to display a given figure.
-
-        Parameters:
-        - fig (str): The path to the figure file.
-        - in_pa (bool): Flag indicating whether the figure is in PA format.
-
-        Returns:
-        None
-        """
-        if self.plot_window:
-            self.plot_window.close()
-
-        self.plot_window = PlotViewer(fig, in_pa=in_pa)
-        self.plot_window.setWindowIcon(self.icon)
-        self.plot_window.show()
+            if self.plot_window:
+                self.plot_window.close()
+                
+            self.plot_window = PlotViewer(plot_data, in_pa=in_pa, norm=norm)
+            self.plot_window.setWindowIcon(self.icon)
+            self.plot_window.show()
 
     def clear_viewer(self) -> None:
         """
