@@ -1,10 +1,11 @@
 import sys
 import numpy as np
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QScrollBar, QVBoxLayout, QHBoxLayout, QWidget, QLabel
+from PySide6.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QScrollBar, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QSizePolicy, QApplication
 from PySide6.QtGui import QShortcut, QKeySequence
 from PySide6.QtWebEngineWidgets import QWebEngineView
-import os
+from typing import Dict, Tuple
+import plotly.graph_objects as go
 
 
 class ArrayTableViewer(QMainWindow):
@@ -21,7 +22,7 @@ class ArrayTableViewer(QMainWindow):
         - columns (int): The number of columns to display in the view window. Default is 10.
         """
         super().__init__()
-        
+
         self.array = array
         self.read_id = read_id
         self.in_pa = in_pa
@@ -161,7 +162,10 @@ class ArrayTableViewer(QMainWindow):
 
 
 class PlotViewer(QMainWindow):
-    def __init__(self, fig: str, in_pa: bool = False):
+    MAX_POINTS = 10000
+    DOWNSAMPLED_PRESENT = False
+
+    def __init__(self, data: Dict[str, np.ndarray], in_pa: bool = False, norm: bool = False):
         """
         Initializes the view window.
 
@@ -171,10 +175,80 @@ class PlotViewer(QMainWindow):
         """
         super().__init__()
 
-        self.fig = fig
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        
+        self.norm = norm
         self.in_pa = in_pa
+
+        self.data = self.normalize_and_resample(data)
+        self.single = len(self.data.keys()) == 1
+
+        fig_str = self.create_plot()
+
         self.initUI()
+        self.web_view.setHtml(fig_str)
+
+        QApplication.restoreOverrideCursor()
+
+
+    def normalize_and_resample(self, data: Dict[str, np.ndarray]) -> Dict[str, Tuple[np.ndarray, np.ndarray, bool]]:
+        """
+        Normalize and resample the data arrays.
+
+        Returns:
+            A dictionary containing the processed data arrays for each read ID.
+            Each value in the dictionary is a tuple containing:
+            - resampled_x: The normalized x-values of the resampled array.
+            - resampled_arr: The resampled array.
+            - downsampled: A boolean indicating whether the array was downsampled.
+        """
+        # Find the length of the longest array
+        max_array_len = max(len(arr) for arr in data.values())
+        
+        processed_data = {}
+        
+        for read_id, arr in data.items():
+            n = len(arr)
+            
+            # Normalize x-values from 0 to the ratio of its length to max_array_len
+            normalized_x = np.linspace(0, n / max_array_len, n)
+
+            downsampled = n > self.MAX_POINTS
+            if downsampled:
+                self.DOWNSAMPLED_PRESENT = True
+                # Calculate the ideal chunk size
+                chunk_size = n / self.MAX_POINTS
+                
+                # Create indices for the start of each chunk
+                indices = [int(i * chunk_size) for i in range(self.MAX_POINTS)]
+                # Add the last index to capture any remaining elements
+                indices.append(n)
+                
+                resampled_arr = []
+                resampled_x = []
+                for i in range(self.MAX_POINTS):
+                    start_idx = indices[i]
+                    end_idx = indices[i + 1]
+                    chunk_mean = np.median(arr[start_idx:end_idx])
+                    resampled_arr.append(chunk_mean)
+                    resampled_x.append(normalized_x[start_idx])
+                
+                # Ensure the last x-value is exactly 1 for the longest array
+                if n == max_array_len:
+                    resampled_x[-1] = 1.0
+            else:
+                # Use the original array and x-values if it's short enough
+                resampled_arr = arr
+                resampled_x = normalized_x
+            
+            if self.norm:
+                resampled_arr = (resampled_arr - np.mean(resampled_arr)) / np.std(resampled_arr)
+            
+            processed_data[read_id] = (resampled_x, resampled_arr, downsampled)
+        
+        return processed_data
     
+
     def initUI(self):
         """
         Initializes the user interface for the main window.
@@ -192,7 +266,74 @@ class PlotViewer(QMainWindow):
         shortcut = QShortcut(QKeySequence("CTRL+Q"), self)
         shortcut.activated.connect(self.close)
 
-        web_view = QWebEngineView(self)
-        web_view.setHtml(self.fig)
-        self.setCentralWidget(web_view)
-        self.show()
+
+        self.web_view = QWebEngineView(self)
+        if self.DOWNSAMPLED_PRESENT:
+            label = QLabel(f"Reads with more than {self.MAX_POINTS} measurements are downsampled to that number of measurements. Downsampled signal(s) are shown as dashed lines.")
+            layout = QVBoxLayout()
+            self.web_view.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+            layout.addWidget(self.web_view)
+            layout.addWidget(label)
+            container = QWidget()
+            container.setLayout(layout)
+            self.setCentralWidget(container)
+        else:
+            self.setCentralWidget(self.web_view)
+
+
+    def create_plot(self) -> str:
+        """
+        Creates a plot of the signal data for the specified read(s).
+
+        Returns:
+            str: The HTML representation of the plot.
+        """
+        fig = self.style_plot(go.Figure())
+        for read_id, (x, y, downsampled) in self.data.items():
+            fig.add_trace(go.Scatter(x=x, y=y, 
+                                     name=read_id, 
+                                     hovertemplate="Signal: %{y:.2f}<br>Time point: %{x}",
+                                     line=dict(dash="dot" if downsampled else "solid")))
+
+        return fig.to_html(include_plotlyjs="cdn")
+    
+
+    def style_plot(self, fig: go.Figure):        
+        title = list(self.data.keys())[0] if self.single else "Current signals of all opened reads"
+        if self.norm:
+            ylabel = "Normalized signal"
+        elif self.in_pa:
+            ylabel = "Signal [pA]"
+        else:
+            ylabel = "Signal"
+
+        fig.update_layout(
+            template="seaborn",
+            title=title,
+            xaxis_title="Relative time point",
+            yaxis_title=ylabel,
+            font=dict(family="Open sans, sans-serif", size=20),
+            plot_bgcolor="white",
+            margin=dict(l=50, r=50, t=50, b=50)
+        )
+        fig.update_xaxes(
+            showline=True,
+            linewidth=2,
+            linecolor='black',
+            mirror=True,
+            showticklabels=True,
+            ticks='outside',
+            showgrid=False,
+            tickwidth=2
+        )
+        fig.update_yaxes(
+            showline=True,
+            linewidth=2,
+            linecolor='black',
+            mirror=True,
+            showticklabels=True,
+            ticks='outside',
+            showgrid=False,
+            tickwidth=2
+        )
+        return fig
