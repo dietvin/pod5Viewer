@@ -1,6 +1,5 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QVBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget, QTextBrowser, QLabel
+from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QVBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QKeySequence, QShortcut, QIcon
-from PySide6.QtWebEngineWidgets import QWebEngineView
 import sys, os, pathlib, yaml, traceback
 from typing import Dict, List, Any, Tuple
 import numpy as np
@@ -286,6 +285,12 @@ class Pod5Viewer(QMainWindow):
                                 <br>Alt & F: Open the file menu
                                 <br>Alt & V: Open the view menu
                                 <br>Alt & H: Open the help menu
+                                <br>
+                            <br><b>View signal window</b>
+                                <br>Pagedown: Scroll down (large steps)
+                                <br>Pageup: Scroll up (large steps)
+                                <br>Arrow down: Scroll down
+                                <br>Arrow up: Scroll up
                             """
         self.info_dialog.setText(shortcuts_text)
         self.info_dialog.setWindowTitle("Shortcuts")
@@ -707,7 +712,7 @@ class Pod5Viewer(QMainWindow):
             data = self.opened_read_data[read_id]["signal" if not in_pa else "signal_pa"]
             fig.add_trace(go.Scatter(y=data, name=read_id, hovertemplate="Signal: %{y:.2f}<br>Time point: %{x}"))
 
-        return fig.to_html(include_plotlyjs='cdn')
+        return fig.to_html(include_plotlyjs="cdn")
 
 
     def open_plot_window(self, fig: str, in_pa: bool = False) -> None:

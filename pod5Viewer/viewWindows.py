@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QScrollBar, QVBoxLayout, QHBoxLayout, QWidget, QLabel
 from PySide6.QtGui import QShortcut, QKeySequence
 from PySide6.QtWebEngineWidgets import QWebEngineView
+import os
 
 
 class ArrayTableViewer(QMainWindow):
@@ -94,6 +95,17 @@ class ArrayTableViewer(QMainWindow):
         shortcut = QShortcut(QKeySequence("CTRL+Q"), self)
         shortcut.activated.connect(self.close)
 
+        shortcut_page_up = QShortcut(QKeySequence(Qt.Key_PageUp), self)
+        shortcut_page_up.activated.connect(lambda: self.scroll_bar.setValue(self.scroll_bar.value() - self.scroll_bar.pageStep()))
+
+        shortcut_page_down = QShortcut(QKeySequence(Qt.Key_PageDown), self)
+        shortcut_page_down.activated.connect(lambda: self.scroll_bar.setValue(self.scroll_bar.value() + self.scroll_bar.pageStep()))
+
+        shortcut_arrow_up = QShortcut(QKeySequence(Qt.Key_Up), self)
+        shortcut_arrow_up.activated.connect(lambda: self.scroll_bar.setValue(self.scroll_bar.value() - self.scroll_bar.singleStep()))
+
+        shortcut_arrow_down = QShortcut(QKeySequence(Qt.Key_Down), self)
+        shortcut_arrow_down.activated.connect(lambda: self.scroll_bar.setValue(self.scroll_bar.value() + self.scroll_bar.singleStep()))
     
     def adjust_window_size(self, cell_width, cell_height):
         """
@@ -161,7 +173,6 @@ class PlotViewer(QMainWindow):
 
         self.fig = fig
         self.in_pa = in_pa
-
         self.initUI()
     
     def initUI(self):
