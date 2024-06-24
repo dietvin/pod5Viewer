@@ -10,10 +10,12 @@ try:
     from help_strings import HELP
     from __version__ import __version__
     from dataHandler import DataHandler
+    from viewWindows import ArrayTableViewer, PlotViewer
 except:
     from pod5Viewer.help_strings import HELP
     from pod5Viewer.__version__ import __version__
     from pod5Viewer.dataHandler import DataHandler
+    from pod5Viewer.viewWindows import ArrayTableViewer, PlotViewer
 
 
 class Pod5Viewer(QMainWindow):
@@ -67,6 +69,7 @@ class Pod5Viewer(QMainWindow):
         if file_paths:
             self.load_files(file_paths)
 
+
     def init_ui(self) -> None:
         """
         Initializes the user interface elements of the Pod5Viewer.
@@ -82,23 +85,28 @@ class Pod5Viewer(QMainWindow):
 
         # set up the dropdown menu in the top
         menubar = self.menuBar()
+
         main_menu = menubar.addMenu("&File")
         main_menu.addAction("Open file(s)...", self.select_files)
         main_menu.addAction("Open directory...", self.select_directory)
         main_menu.addSeparator()
+
         export_menu = main_menu.addMenu("Export")
         export_menu.addAction("Export current read...", self.export_current_read)
         export_menu.addAction("Export all opened reads...", self.export_all_opened_reads)
         main_menu.addSeparator()
+
         main_menu.addAction("Clear", self.clear_viewer)
-        main_menu.addSeparator()        
+        main_menu.addSeparator()  
+
         main_menu.addAction("Exit", self.close)
 
         view_menu = menubar.addMenu("&View")
 
         view_signal_menu = view_menu.addMenu("View signal...")
         view_signal_menu.addAction("View full signal data...", lambda: self.show_full_signal(in_pa=False))
-        view_signal_menu.addAction("View full signal pA data...", lambda: self.show_full_signal(in_pa=False))
+        view_signal_menu.addAction("View full signal pA data...", lambda: self.show_full_signal(in_pa=True))
+        view_menu.addSeparator()
 
         plot_signal_menu = view_menu.addMenu("Plot signal...")
         plot_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(single=True))
@@ -112,7 +120,6 @@ class Pod5Viewer(QMainWindow):
         help_menu.addAction("Shortcuts", self.show_shortcuts)
         help_menu.addSeparator()
         help_menu.addAction("About", self.show_about)
-
 
         self.info_dialog = QMessageBox()
         self.info_dialog.setWindowIcon(self.icon)
@@ -143,6 +150,26 @@ class Pod5Viewer(QMainWindow):
 
         layout.addWidget(self.file_navigator, 1)
         layout.addWidget(self.data_tab_viewer, 2)
+
+
+    def closeEvent(self, event) -> None:
+        """
+        Overrides the closeEvent method of the QMainWindow class.
+        Closes other windows before closing the main window.
+
+        Args:
+            event (QCloseEvent): The close event triggered by the user.
+
+        Returns:
+            None
+        """
+        if self.data_view_window:
+            self.data_view_window.close()
+        if self.plot_window:
+            self.plot_window.close()    
+        # Call the base class implementation
+        super().closeEvent(event)
+
 
     def __resource_path(self, relative_path) -> str:
         """
@@ -603,30 +630,9 @@ class Pod5Viewer(QMainWindow):
         if self.data_view_window:
             self.data_view_window.close()
 
-        self.data_view_window = QMainWindow()
-        self.data_view_window.setGeometry(100, 100, 800, 600)
-        self.data_view_window.setWindowIcon(self.icon)
-        # Create shortcut for closing window
-        shortcut = QShortcut(QKeySequence("CTRL+Q"), self.data_view_window)
-        shortcut.activated.connect(self.data_view_window.close)
-        
-        self.data_view_window.setWindowTitle(f"{'Signal [pA]' if in_pa else 'Signal'}")
-
-        # TODO: Somehow show the data only partially. Maybe some sort of scroll element that shows only x number of data points at a time
         data = self.opened_read_data[read_id]["signal" if not in_pa else "signal_pa"]
-        data = ",".join(str(x) for x in data)
-
-        read_id_label = QLabel(f"Read ID: {read_id}")
-        data_viewer = QTextBrowser()
-        data_viewer.setText(data)
-
-        layout = QVBoxLayout()
-        layout.addWidget(read_id_label)
-        layout.addWidget(data_viewer)
-        container = QWidget()
-        container.setLayout(layout)
-
-        self.data_view_window.setCentralWidget(container)
+        self.data_view_window = ArrayTableViewer(data, read_id=read_id, in_pa=in_pa)
+        self.data_view_window.setWindowIcon(self.icon)
         self.data_view_window.show()
 
 
@@ -649,6 +655,7 @@ class Pod5Viewer(QMainWindow):
 
             fig = self.create_plot(read_ids, in_pa=in_pa, single=single)
             self.open_plot_window(fig, in_pa=in_pa)
+
 
     def create_plot(self, read_ids: List[str], in_pa: bool = False, single: bool = True) -> str:
         """
@@ -705,30 +712,20 @@ class Pod5Viewer(QMainWindow):
 
     def open_plot_window(self, fig: str, in_pa: bool = False) -> None:
         """
-        Opens a new window to display a plot of the provided data.
+        Opens a plot window to display a given figure.
 
-        Args:
-            fig (str): The HTML representation of the plot.
-            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. Defaults to False.
+        Parameters:
+        - fig (str): The path to the figure file.
+        - in_pa (bool): Flag indicating whether the figure is in PA format.
 
         Returns:
-            None
+        None
         """
         if self.plot_window:
             self.plot_window.close()
 
-        self.plot_window = QMainWindow()
-        self.plot_window.setGeometry(100, 100, 800, 600)
+        self.plot_window = PlotViewer(fig, in_pa=in_pa)
         self.plot_window.setWindowIcon(self.icon)
-        # Create shortcut for closing window
-        shortcut = QShortcut(QKeySequence("CTRL+Q"), self.plot_window)
-        shortcut.activated.connect(self.plot_window.close)
-        
-        self.plot_window.setWindowTitle(f"{'Signal [pA]' if in_pa else 'Signal'}")
-        
-        web_view = QWebEngineView(self.plot_window)
-        web_view.setHtml(fig)
-        self.plot_window.setCentralWidget(web_view)
         self.plot_window.show()
 
     def clear_viewer(self) -> None:
