@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QEvent
 from PySide6.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QScrollBar, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QSizePolicy, QApplication
 from PySide6.QtGui import QShortcut, QKeySequence
 from PySide6.QtWebEngineWidgets import QWebEngineView
@@ -69,7 +69,8 @@ class ArrayTableViewer(QMainWindow):
         self.scroll_bar.setMaximum(self.total_chunks - 1)
         self.scroll_bar.setSingleStep(1)
         self.scroll_bar.valueChanged.connect(self.update_display)
-        
+        self.table_widget.installEventFilter(self)
+       
         # Initial display
         self.update_display(0)
         
@@ -107,6 +108,12 @@ class ArrayTableViewer(QMainWindow):
 
         shortcut_arrow_down = QShortcut(QKeySequence(Qt.Key_Down), self)
         shortcut_arrow_down.activated.connect(lambda: self.scroll_bar.setValue(self.scroll_bar.value() + self.scroll_bar.singleStep()))
+    
+    def eventFilter(self, watched, event):
+        if watched == self.table_widget and event.type() == QEvent.Wheel:
+            self.scroll_bar.event(event)  # Redirect wheel event to the scroll bar
+            return True  # Event handled    
+        return super().eventFilter(watched, event)  # Call base class method for other events
     
     def adjust_window_size(self, cell_width, cell_height):
         """
@@ -269,7 +276,7 @@ class PlotViewer(QMainWindow):
 
         self.web_view = QWebEngineView(self)
         if self.DOWNSAMPLED_PRESENT:
-            label = QLabel(f"Reads with more than {self.MAX_POINTS} measurements are downsampled to that number of measurements. Downsampled signal(s) are shown as dashed lines.")
+            label = QLabel(f"Reads with more than {self.MAX_POINTS} measurements are downsampled to that number of measurements for plotting. Downsampled signal(s) are shown as dashed lines.")
             layout = QVBoxLayout()
             self.web_view.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
             layout.addWidget(self.web_view)
