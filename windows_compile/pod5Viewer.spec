@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['C:\\Users\\vince\\projects\\pod5view\\windows_compile\\pod5Viewer\\__main__.py'],
+    ['..\\pod5Viewer\\__main__.py'],
     pathex=[],
     binaries=[],
-    datas=[('C:\\Users\\vince\\projects\\pod5view\\windows_compile\\pod5Viewer\\icon.ico', '.')],
+    datas=[('..\\pod5Viewer\\icon.ico', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -32,7 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['C:\\Users\\vince\\projects\\pod5view\\windows_compile\\pod5Viewer\\icon.ico'],
+    icon=['..\\pod5Viewer\\icon.ico'],
 )
 coll = COLLECT(
     exe,
