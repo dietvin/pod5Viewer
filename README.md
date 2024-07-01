@@ -79,6 +79,7 @@ The pod5Viewer is built in Python (v3.12.3) and relies on the following packages
 The compliation for Windows was performed using the pyinstaller (v6.8.0) and the Windows installer was created using the Inno Setup Compiler (v6.3.1).
 
 ## Usage
+![overview](./images/pod5Viewer_overview.png)
 
 The pod5Viewer consists of two main panels. On the left side is the file navigator panel and on the right side is the data view panel. Files can be opened individiually by selecting the `Open file(s)...` option in the `File` menu. Alternatively all files in a directory can be opened simultaneously through the `Open directory...` option.
 
