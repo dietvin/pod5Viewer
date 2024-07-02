@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QVBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QKeySequence, QShortcut, QIcon
+from PySide6.QtCore import Qt
 import sys, os, pathlib, yaml, traceback
 from typing import Dict, List, Any, Tuple
 import numpy as np
@@ -582,14 +583,18 @@ class Pod5Viewer(QMainWindow):
         Returns:
             None
         """
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+
         file_path = os.path.join(directory, f"{read_id}.yaml")
+        transformed_data = self.transform_data(self.opened_read_data[read_id], shorten=False)
         if read_id in self.opened_read_data.keys():
-            transformed_data = self.transform_data(self.opened_read_data[read_id])
             with open(file_path, 'w') as file:
                 yaml.dump(transformed_data, file)
 
+        QApplication.restoreOverrideCursor()
 
-    def transform_data(self, data) -> Dict[str, Any]:
+
+    def transform_data(self, data: Dict[str, Any], shorten: bool = True) -> Dict[str, Any]:
         """
         Transforms the "signal" and "signal_pa" entries in the data to comma separated strings.
 
@@ -603,7 +608,7 @@ class Pod5Viewer(QMainWindow):
         for key, value in data.items():
             if key == "signal" or key == "signal_pa":
                 num_values = 100
-                if len(value) > num_values:
+                if shorten and (len(value) > num_values):
                     transformed_data[key] = ",".join(str(x) for x in value[:num_values]) + "..."
                 else:
                     transformed_data[key] = ",".join(str(x) for x in value)
