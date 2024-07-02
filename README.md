@@ -8,7 +8,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
 
 For Windows systems the pod5Viewer can be installed conveniently via the installer. The installer can be downloaded here:
 
-[pod5Viewer_Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.0.0/pod5Viewer_Setup.exe "Download pod5Viewer Windows installer")
+[pod5Viewer_Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5Viewer_Setup.exe "Download pod5Viewer Windows installer")
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
@@ -34,7 +34,7 @@ One option to still use the pod5Viewer is to allow the execution in the `Virus &
 
 For Ubuntu systems the pod5Viewer can be installed from a DEB file using apt. For this download the DEB file from the following link:
 
-[pod5Viewer.deb](https://github.com/dietvin/pod5Viewer/releases/download/1.0.0/pod5viewer_1.0.deb "Download pod5Viewer deb file")
+[pod5Viewer.deb](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5viewer_1.0.1_ubuntu22.04.deb "Download pod5Viewer for Ubuntu 22.04")
 
 After downloading use apt to install it on the system:
 
