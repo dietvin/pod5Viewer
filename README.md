@@ -33,9 +33,9 @@ One option to still use the pod5Viewer is to allow the execution in the `Virus &
 ### Linux
 
 DEB files are available for Ubuntu 22.04, 24.04 and Linux Mint 21.3 at the following links:
-[Ubuntu 22.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5viewer_1.0.1_ubuntu22.04.deb "Download pod5Viewer for Ubuntu 22.04")
-[Ubuntu 24.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5viewer_1.0.1_ubuntu24.04.deb "Download pod5Viewer for Ubuntu 24.04")
-[Linux Mint 21.3](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5viewer_1.0.1_linuxmint21.3.deb "Download pod5Viewer for Linux Mint 21.3")
+- [Ubuntu 22.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5viewer_1.0.1_ubuntu22.04.deb "Download pod5Viewer for Ubuntu 22.04")
+- [Ubuntu 24.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5viewer_1.0.1_ubuntu24.04.deb "Download pod5Viewer for Ubuntu 24.04")
+- [Linux Mint 21.3](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5viewer_1.0.1_linuxmint21.3.deb "Download pod5Viewer for Linux Mint 21.3")
 
 After downloading use apt to install it on the system:
 
