@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "pod5Viewer"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Vincent Dietrich"
 #define MyAppURL "https://github.com/dietvin/pod5Viewer"
 #define MyAppExeName "pod5Viewer.exe"
@@ -13,7 +13,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{1BB79BF3-15CA-4A65-B264-5E77137B15C0}
+AppId={{CC3CB553-CFC9-4429-900E-42C932AC8F20}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -36,7 +36,7 @@ LicenseFile=C:\Users\vince\projects\pod5view\LICENSE
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputBaseFilename=pod5Viewer_setup
+OutputBaseFilename=pod5Viewer_Setup
 SetupIconFile=C:\Users\vince\projects\pod5view\pod5Viewer\icon.ico
 Compression=lzma
 SolidCompression=yes
@@ -50,7 +50,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Users\vince\projects\pod5view\windows_compile\dist\pod5Viewer\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\vince\projects\pod5view\windows_compile\dist\pod5Viewer\_internal\*"; DestDir: "{app}/_internal"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\vince\projects\pod5view\windows_compile\dist\pod5Viewer\_internal\*"; DestDir: "{app}\_internal"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
