@@ -164,3 +164,8 @@ cython_debug/
 build/
 _internal/
 *.deb
+
+# Ignore all pod5 files
+*.pod5
+# Exclude test_data folder from the ignore rule
+!test_data/
