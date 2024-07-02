@@ -47,8 +47,6 @@ class DataHandler:
         temp_dir = tempfile.gettempdir()
         try:
             os.chdir(temp_dir)
-            print(f"Changed working directory to: {temp_dir}")
-
             file_paths = self.dataset_reader.paths
             id_path_dict = dict(zip([str(file) for file in file_paths],
                                     [self.dataset_reader.get_reader(file).read_ids for file in file_paths]))
@@ -57,7 +55,6 @@ class DataHandler:
             raise e
         finally:    
             os.chdir(original_cwd)
-            print(f"Reverted to the original working directory: {original_cwd}")
 
     
     def load_read_data(self, read_id: str) -> Dict[str, Any]:
