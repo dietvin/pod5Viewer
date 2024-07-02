@@ -16,6 +16,12 @@ except:
     from pod5Viewer.dataHandler import DataHandler
     from pod5Viewer.viewWindows import ArrayTableViewer, PlotViewer
 
+# needed to work on Linux Mint...
+if platform.system() == 'Linux':
+    with open('/etc/os-release') as f:
+        release_info = f.read()
+        if 'Linux Mint' in release_info:
+            os.environ['QT_QUICK_BACKEND'] = 'software'
 
 class Pod5Viewer(QMainWindow):
     """
