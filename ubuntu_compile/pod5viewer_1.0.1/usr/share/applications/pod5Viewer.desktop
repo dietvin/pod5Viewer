@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0.1
+Name=Pod5 Viewer
+Comment=View and navigate through POD5 files
+Exec=/usr/local/bin/pod5Viewer %F
+Icon=/usr/local/bin/icon.ico
+Terminal=false
+Type=Application
+Categories=Utility;Viewer;
+MimeType=application/x-pod5;

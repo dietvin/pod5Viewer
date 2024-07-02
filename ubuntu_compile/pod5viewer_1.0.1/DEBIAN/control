@@ -1,0 +1,10 @@
+Package: pod5viewer
+Version: 1.0.1
+Section: base
+Priority: optional
+Architecture: amd64
+Maintainer: Vincent Dietrich <dietricv@uni-mainz.de>
+Description: GUI for inspecting pod5 files
+ The pod5Viewer is a Python application that provides a graphical user interface for viewing and navigating through POD5 files. 
+ It allows users to open multiple POD5 files, explore their contents, and display detailed data for selected read IDs.
+ 
