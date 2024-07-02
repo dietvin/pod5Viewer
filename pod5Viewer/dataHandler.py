@@ -1,5 +1,5 @@
 from typing import Dict, Any, List
-import pod5, pathlib, datetime, uuid, numpy as np
+import pod5, pathlib, datetime, uuid, numpy as np, tempfile, os
 
 class DataHandler:
     """
@@ -22,7 +22,6 @@ class DataHandler:
         process_signal_rows(sig_rows: list[pod5.reader.SignalRowInfo]) -> Dict[str, Any]:
             Processes signal row information into a dictionary format.
     """
-
     pod5_paths: List[pathlib.Path]
     pod5_ids_to_path: Dict[str, List[str]]
 
@@ -35,7 +34,8 @@ class DataHandler:
         """
         self.pod5_paths = pod5_paths
         self.dataset_reader = pod5.DatasetReader(pod5_paths)
-    
+
+
     def ids_to_path(self) -> Dict[str, List[str]]:
         """
         Creates a dictionary mapping each file path to a list of read IDs it contains.
@@ -43,10 +43,22 @@ class DataHandler:
         Returns:
             Dict[str, List[str]]: A dictionary where keys are file paths (as strings) and values are lists of read IDs.
         """
-        file_paths = self.dataset_reader.paths
-        id_path_dict = dict(zip([str(file) for file in file_paths],
-                                 [self.dataset_reader.get_reader(file).read_ids for file in file_paths]))
-        return id_path_dict
+        original_cwd = os.getcwd()
+        temp_dir = tempfile.gettempdir()
+        try:
+            os.chdir(temp_dir)
+            print(f"Changed working directory to: {temp_dir}")
+
+            file_paths = self.dataset_reader.paths
+            id_path_dict = dict(zip([str(file) for file in file_paths],
+                                    [self.dataset_reader.get_reader(file).read_ids for file in file_paths]))
+            return id_path_dict
+        except Exception as e:
+            raise e
+        finally:    
+            os.chdir(original_cwd)
+            print(f"Reverted to the original working directory: {original_cwd}")
+
     
     def load_read_data(self, read_id: str) -> Dict[str, Any]:
         """
