@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 from PySide6.QtCore import Qt, QEvent
 from PySide6.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QScrollBar, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QSizePolicy, QApplication
