@@ -169,3 +169,5 @@ _internal/
 *.pod5
 # Exclude test_data folder from the ignore rule
 !test_data/
+
+ubuntu_compile/
