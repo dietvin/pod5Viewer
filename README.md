@@ -2,7 +2,7 @@
 
 The pod5Viewer is a Python application that provides a graphical user interface for viewing and navigating through POD5 files. It allows users to open multiple POD5 files, explore their contents, and display detailed data for selected read IDs.
 
----
+## Table of Contents
 - [Installation and requirements](#installation-and-requirements)
   - [Windows](#windows)
   - [Linux](#linux)
