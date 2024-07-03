@@ -10,12 +10,13 @@ BASEDIR="./pod5viewer_${VERSION}_${SYSTEM}_${SYSTEMVERSION}"
 
 echo "Running pyinstaller"
 pyinstaller pod5Viewer.spec --noconfirm || exit 1
-rm -r ./dist ./build
 
 echo "Creating and populating folder ${BASEDIR}/usr/local/bin"
 
 mkdir -p ${BASEDIR}/usr/local/bin
-mv pod5Viewer/dist/pod5Viewer/* ${BASEDIR}/usr/local/bin/
+mv ./dist/pod5Viewer/* ${BASEDIR}/usr/local/bin/
+rm -r ./dist ./build
+
 cp ../pod5Viewer/icon.ico ${BASEDIR}/usr/local/bin/
 
 echo "Creating and populating folder ${BASEDIR}/DEBIAN"
