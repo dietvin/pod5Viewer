@@ -171,3 +171,8 @@ _internal/
 !test_data/
 
 ubuntu_compile/
+
+# Ignore all files in the linux_compile folder
+linux_compile/*.deb
+linux_compile/build/
+linux_compile/dist/
