@@ -2,11 +2,15 @@
 
 The pod5Viewer is a Python application that provides a graphical user interface for viewing and navigating through POD5 files. It allows users to open multiple POD5 files, explore their contents, and display detailed data for selected read IDs.
 
-[Installation and requirements](#installation-and-requirements)
-  [Windows](#windows)
-  [Linux](#linux)
-  [OS independent](#os-independent)
-  [Dependencies](#dependencies)
+- [Installation and requirements](#installation-and-requirements)
+  - [Windows](#windows)
+  - [Linux](#linux)
+  - [OS independent](#os-independent)
+  - [Dependencies](#dependencies)
+- [Usage](#usage)
+  - [Viewing, plotting and exporting](#viewing,-plotting-and-exporting)
+  - [Shortcuts](#shortcuts)
+- [License](#license) 
   
 ## Installation and requirements
 
@@ -96,7 +100,7 @@ Some attributes in read entries contain nested data. The attributes can be expan
 
 For clearing both file navigator and data view panel, select `Clear` in the `File` menu. The `Exit` option in the `File` menu closes the pod5Viewer.
 
-### Viewing, plotting and export
+### Viewing, plotting and exporting
 
 Current signals of either all opened reads or only the currently focused read can be viewed and plotted via the `View` menu. For viewing the measurements select an option in the `View signal...` submenu. This shows individual current measurements (in pA if selected) of the currently focussed reads in bins of 100 values. The scroll bar is used to scroll through the bins.
 
