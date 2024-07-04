@@ -25,6 +25,9 @@ For Windows systems the pod5Viewer can be installed conveniently via the install
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
+#### Note:
+When running the installer a the Windows defender might open the Window `Windows protected your PC`. To continue the installation, press `More Info` and `Run anyway`. 
+
 ### Linux
 
 DEB files are available for Ubuntu 22.04, 24.04 and Linux Mint 21.3 at the following links:
