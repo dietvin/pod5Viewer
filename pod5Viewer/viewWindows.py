@@ -189,7 +189,7 @@ class PlotViewer(QMainWindow):
 
         if self.check_for_total_points(data):
             warm_msg = "The total number of measurements in the data exceeds the recommended threshold. The plot will likely not be displayed properly. For more information refer to the <a href='https://github.com/dietvin/pod5Viewer?tab=readme-ov-file#limitations'>Documentation</a>."
-            QMessageBox.warning(self, "Warning", warm_msg)
+            QMessageBox.warning(self, "Large amounts of measurements", warm_msg)
 
         self.data = self.normalize_and_resample(data)
         self.single = len(self.data.keys()) == 1
