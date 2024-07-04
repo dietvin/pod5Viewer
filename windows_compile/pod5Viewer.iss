@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "pod5Viewer"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "Vincent Dietrich"
 #define MyAppURL "https://github.com/dietvin/pod5Viewer"
 #define MyAppExeName "pod5Viewer.exe"
