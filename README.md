@@ -6,6 +6,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
 - [Installation and requirements](#installation-and-requirements)
   - [Windows](#windows)
   - [Linux](#linux)
+  - [MacOS](#macos)
   - [OS independent](#os-independent)
   - [Dependencies](#dependencies)
 - [Usage](#usage)
@@ -20,7 +21,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
 
 For Windows systems the pod5Viewer can be installed conveniently via the installer. The installer can be downloaded here:
 
-[pod5Viewer-1.0.1-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5Viewer-1.0.1-Setup.exe)
+[pod5Viewer-1.0.1-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5Viewer-1.0.1-Setup.exe "Download pod5Viewer Windows installer")
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
@@ -57,26 +58,40 @@ sudo apt install ./pod5viewer_1.0.1_<SYSTEM>.deb
 
 Like the Windows installation, the pod5Viewer can then be opened like any other installed application.
 
+### MacOS
+**COMING SOON**
+
 ### OS-independent
+The pod5Viewer can be installed via the Python packaging index using `pip`. 
 
-On all systems the pod5Viewer can be installed via pip:
+Note that when installing the pod5Viewer via pip, it can only be started from the command line. It is not possible to open POD5 files directly from a file browser.
 
+Here we recommend installing the pod5Viewer into a fresh virtual environment via [Conda](https://docs.anaconda.com/miniconda/) or a similar environment manager:
 ```bash
-git clone https://github.com/dietvin/pod5Viewer.git
-cd pod5Viewer
-pip install .
+conda create -n p5v python==3.12 
+conda activate p5v
 ```
-
-To run the pod5Viewer type:
-
+With the virtual environment active, the pod5Viewer can be installed via pip:
+```bash
+pip install pod5Viewer
+```
+To start the pod5Viewer from a python environment type:
 ```bash
 pod5Viewer
 ```
-
 Optionally specify one or more path(s) to POD5 file(s) to open these directly:
 
 ```bash
 pod5Viewer file1.pod5 file2.pod5
+```
+
+---
+
+Alternatively, the pod5Viewer can be installed from source:
+```bash
+git clone https://github.com/dietvin/pod5Viewer.git
+cd pod5Viewer
+pip install .
 ```
 
 ### Dependencies
@@ -146,7 +161,8 @@ View signal window:
 
 ## Limitations
 ### Plotting large amounts of data
-When plotting many reads at a time the figure can become too large for displaying it in the plot window and it may show a white screen only. This is due to limitations of the plotly framework. The limit for this is around 40000 measurements in one plot. In this case, it is recommended to plot fewer reads at a time.
+When plotting many reads at a time the figure can become too large for displaying it in the plot window and it may show a white screen only. This is due to limitations of the plotly framework. The limit for this is around 40000 measurements in one plot, if this number is exceeded a warning pops up when opening the plot window. 
+If a plot does not show, it is recommended to plot fewer reads at a time.
 
 ## License
 
