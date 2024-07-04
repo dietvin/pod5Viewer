@@ -25,24 +25,6 @@ For Windows systems the pod5Viewer can be installed conveniently via the install
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
-#### Important Note
-
-For Windows 11 systems, Windows Security falsely flags the pod5Viewer EXE as a virus:
-
-```
-Trojan:Win32/Phonzy.B!ml
-
-Alert level: Severe
-Category: Trojan
-Details: This program is dangerous and executes commands from an attacker.
-```
-
-For more details see summary by Microsoft [here](https://go.microsoft.com/fwlink/?linkid=142185&name=Trojan:Win32/Phonzy.B!ml&threatid=2147772963).
-
-One option to still use the pod5Viewer is to allow the execution in the `Virus & threat protection` menu in the Security settings.
-
-**We already submitted the pod5Viewer for malware analysis to Microsoft to be whitelisted soon.**
-
 ### Linux
 
 DEB files are available for Ubuntu 22.04, 24.04 and Linux Mint 21.3 at the following links:
