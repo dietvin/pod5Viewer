@@ -176,3 +176,5 @@ ubuntu_compile/
 linux_compile/*.deb
 linux_compile/build/
 linux_compile/dist/
+
+*.exe
