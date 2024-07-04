@@ -20,7 +20,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
 
 For Windows systems the pod5Viewer can be installed conveniently via the installer. The installer can be downloaded here:
 
-[pod5Viewer_Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5Viewer_Setup.exe "Download pod5Viewer Windows installer")
+[pod5Viewer-1.0.1-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.0.1/pod5Viewer-1.0.1-Setup.exe)
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
