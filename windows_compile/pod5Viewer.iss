@@ -32,12 +32,12 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 ChangesAssociations=yes
 DisableProgramGroupPage=yes
-LicenseFile=C:\Users\vince\projects\pod5view\LICENSE
+LicenseFile=..\LICENSE
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputBaseFilename=pod5Viewer_Setup
-SetupIconFile=C:\Users\vince\projects\pod5view\pod5Viewer\icon.ico
+SetupIconFile=..\pod5Viewer\icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -49,8 +49,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\vince\projects\pod5view\windows_compile\dist\pod5Viewer\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\vince\projects\pod5view\windows_compile\dist\pod5Viewer\_internal\*"; DestDir: "{app}\_internal"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ".\dist\pod5Viewer\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\dist\pod5Viewer\_internal\*"; DestDir: "{app}\_internal"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
