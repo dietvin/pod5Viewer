@@ -1,6 +1,6 @@
 import numpy as np
 from PySide6.QtCore import Qt, QEvent
-from PySide6.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QScrollBar, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QSizePolicy, QApplication
+from PySide6.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QScrollBar, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QSizePolicy, QApplication, QMessageBox
 from PySide6.QtGui import QShortcut, QKeySequence
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from typing import Dict, Tuple
@@ -170,6 +170,7 @@ class ArrayTableViewer(QMainWindow):
 class PlotViewer(QMainWindow):
     MAX_POINTS = 10000
     DOWNSAMPLED_PRESENT = False
+    TOTAL_POINTS_THRESHOLD = 40000
 
     def __init__(self, data: Dict[str, np.ndarray], in_pa: bool = False, norm: bool = False):
         """
@@ -186,6 +187,10 @@ class PlotViewer(QMainWindow):
         self.norm = norm
         self.in_pa = in_pa
 
+        if self.check_for_total_points(data):
+            warm_msg = "The total number of measurements in the data exceeds the recommended threshold. The plot will likely not be displayed properly. For more information refer to the <a href='https://github.com/dietvin/pod5Viewer?tab=readme-ov-file#limitations'>Documentation</a>."
+            QMessageBox.warning(self, "Warning", warm_msg)
+
         self.data = self.normalize_and_resample(data)
         self.single = len(self.data.keys()) == 1
 
@@ -195,6 +200,25 @@ class PlotViewer(QMainWindow):
         self.web_view.setHtml(fig_str)
 
         QApplication.restoreOverrideCursor()
+
+
+    def check_for_total_points(self, data: Dict[str, np.ndarray]) -> bool:
+        """
+        Check if the total number of points in the data is greater than the maximum recommended points.
+
+        Args:
+            data (Dict[str, np.ndarray]): A dictionary containing the data arrays for each read ID.
+
+        Returns:
+            bool: True if the total number of points in the data is greater than the maximum allowed points, False otherwise.
+        """
+        total_points = 0
+        for arr in data.values():
+            if len(arr) > self.MAX_POINTS:
+                total_points += self.MAX_POINTS
+            else:  
+                total_points += len(arr)
+        return total_points > self.TOTAL_POINTS_THRESHOLD
 
 
     def normalize_and_resample(self, data: Dict[str, np.ndarray]) -> Dict[str, Tuple[np.ndarray, np.ndarray, bool]]:
@@ -296,7 +320,7 @@ class PlotViewer(QMainWindow):
         """
         fig = self.style_plot(go.Figure())
         for read_id, (x, y, downsampled) in self.data.items():
-            fig.add_trace(go.Scatter(x=x, y=y, 
+            fig.add_trace(go.Scattergl(x=x, y=y, 
                                      name=read_id, 
                                      hovertemplate="Signal: %{y:.2f}<br>Time point: %{x}",
                                      line=dict(dash="dot" if downsampled else "solid")))
