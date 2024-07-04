@@ -11,6 +11,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
 - [Usage](#usage)
   - [Viewing, plotting and exporting](#viewing,-plotting-and-exporting)
   - [Shortcuts](#shortcuts)
+- [Limitations](#limitations)
 - [License](#license) 
 
 ## Installation and requirements
@@ -142,6 +143,10 @@ View signal window:
 - Pageup: Scroll up (large steps)
 - Arrow down: Scroll down
 - Arrow up: Scroll up
+
+## Limitations
+### Plotting large amounts of data
+When plotting many reads at a time the figure can become too large for displaying it in the plot window and it may show a white screen only. This is due to limitations of the plotly framework. The limit for this is around 40000 measurements in one plot. In this case, it is recommended to plot fewer reads at a time.
 
 ## License
 
