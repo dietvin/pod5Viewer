@@ -38,7 +38,7 @@ DEB files are available for Ubuntu 22.04, 24.04 and Linux Mint 21.3 at the follo
 After downloading use apt to install it on the system:
 
 ```bash
-sudo apt install ./pod5viewer_1.0.1_<SYSTEM>.deb
+sudo apt install ./pod5viewer_1.0.2_<SYSTEM>.deb
 ```
 
 Like the Windows installation, the pod5Viewer can then be opened like any other installed application.
