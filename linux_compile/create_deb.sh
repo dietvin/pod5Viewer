@@ -17,7 +17,7 @@ mkdir -p ${BASEDIR}/usr/local/bin
 mv ./dist/pod5Viewer/* ${BASEDIR}/usr/local/bin/
 rm -r ./dist ./build
 
-cp ../pod5Viewer/icon.ico ${BASEDIR}/usr/local/bin/
+cp ../images/icon.png ${BASEDIR}/usr/local/bin/
 
 echo "Creating and populating folder ${BASEDIR}/DEBIAN"
 
@@ -31,7 +31,7 @@ chmod 0755 ${BASEDIR}/DEBIAN/postinst
 echo "Creating and populating folder ${BASEDIR}/usr/share/applications"
 
 mkdir -p ${BASEDIR}/usr/share/applications
-echo -e "[Desktop Entry]\nVersion=${VERSION}\nName=pod5Viewer\nComment=View and navigate through POD5 files\nExec=/usr/local/bin/pod5Viewer %F\nIcon=/usr/local/bin/icon.ico\nTerminal=false\nType=Application\nCategories=Utility;Viewer;\nMimeType=application/x-pod5;\n" \
+echo -e "[Desktop Entry]\nVersion=${VERSION}\nName=pod5Viewer\nComment=View and navigate through POD5 files\nExec=/usr/local/bin/pod5Viewer %F\nIcon=/usr/local/bin/icon.png\nTerminal=false\nType=Application\nCategories=Utility;Viewer;\nMimeType=application/x-pod5;\n" \
     > ${BASEDIR}/usr/share/applications/pod5Viewer.desktop
 
 echo "Creating and populating folder ${BASEDIR}/usr/share/mime/packages"
