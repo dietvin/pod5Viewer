@@ -320,7 +320,7 @@ class PlotViewer(QMainWindow):
         """
         fig = self.style_plot(go.Figure())
         for read_id, (x, y, downsampled) in self.data.items():
-            fig.add_trace(go.Scattergl(x=x, y=y, 
+            fig.add_trace(go.Scatter(x=x, y=y, 
                                      name=read_id, 
                                      hovertemplate="Signal: %{y:.2f}<br>Time point: %{x}",
                                      line=dict(dash="dot" if downsampled else "solid")))
