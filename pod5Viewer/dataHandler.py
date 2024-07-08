@@ -1,5 +1,7 @@
 from typing import Dict, Any, List
 import pod5, pathlib, datetime, uuid, numpy as np, tempfile, os
+from pod5.pod5_types import EndReasonEnum
+
 
 class DataHandler:
     """
@@ -83,14 +85,16 @@ class DataHandler:
         obj_dict = {}
 
         members = [attr for attr in dir(obj) if not callable(getattr(obj, attr)) and not attr.startswith("_")]
-        
+
         for member in members: 
             member_value = getattr(obj, member)
-
             if member == "signal_rows":
                 obj_dict[member] = self.process_signal_rows(member_value)
             elif type(member_value) in [float, int, str, bool, dict, datetime.datetime, uuid.UUID, np.ndarray]:
                 obj_dict[member] = member_value
+            # implemented to fix recursion error on MacOS:
+            elif type(member_value) == EndReasonEnum: 
+                return {"name": member_value.name, "value": member_value.value}
             else:
                 obj_dict[member] = self.members_to_dict(member_value)
 

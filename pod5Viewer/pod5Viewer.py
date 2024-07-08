@@ -6,15 +6,15 @@ from typing import Dict, List, Any, Tuple
 import numpy as np
 
 try:
-    from help_strings import HELP
-    from __version__ import __version__
-    from dataHandler import DataHandler
-    from viewWindows import ArrayTableViewer, PlotViewer
-except:
     from pod5Viewer.help_strings import HELP
     from pod5Viewer.__version__ import __version__
     from pod5Viewer.dataHandler import DataHandler
     from pod5Viewer.viewWindows import ArrayTableViewer, PlotViewer
+except ModuleNotFoundError:
+    from help_strings import HELP
+    from __version__ import __version__
+    from dataHandler import DataHandler
+    from viewWindows import ArrayTableViewer, PlotViewer
 
 # needed to work on Linux Mint...
 if platform.system() == 'Linux':
@@ -22,6 +22,7 @@ if platform.system() == 'Linux':
         release_info = f.read()
         if 'Linux Mint' in release_info:
             os.environ['QT_QUICK_BACKEND'] = 'software'
+
 
 class Pod5Viewer(QMainWindow):
     """
@@ -90,6 +91,7 @@ class Pod5Viewer(QMainWindow):
 
         # set up the dropdown menu in the top
         menubar = self.menuBar()
+        menubar.setNativeMenuBar(False) # activate menu bar on MacOS
 
         main_menu = menubar.addMenu("&File")
         main_menu.addAction("Open file(s)...", self.select_files)
