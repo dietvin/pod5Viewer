@@ -178,3 +178,4 @@ linux_compile/build/
 linux_compile/dist/
 
 *.exe
+*.dmg
