@@ -19,3 +19,6 @@ create-dmg \
     --app-drop-link 600 185 \
     ./pod5viewer_${VERSION}_macos_${SYSTEMVERSION}-Setup.dmg \
     dist/
+
+echo "Cleaning up"
+rm -r build dist
