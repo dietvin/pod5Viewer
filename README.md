@@ -3,17 +3,17 @@
 The pod5Viewer is a Python application that provides a graphical user interface for viewing and navigating through POD5 files. It allows users to open multiple POD5 files, explore their contents, and display detailed data for selected read IDs.
 
 ## Table of Contents
+
 - [Installation and requirements](#installation-and-requirements)
   - [Windows](#windows)
   - [Linux](#linux)
-  - [MacOS](#macos)
   - [OS independent](#os-independent)
   - [Dependencies](#dependencies)
 - [Usage](#usage)
   - [Viewing, plotting and exporting](#viewing,-plotting-and-exporting)
   - [Shortcuts](#shortcuts)
 - [Limitations](#limitations)
-- [License](#license) 
+- [License](#license)
 
 ## Installation and requirements
 
@@ -26,11 +26,13 @@ For Windows systems the pod5Viewer can be installed conveniently via the install
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
 #### Note:
-When running the installer a the Windows defender might open the Window `Windows protected your PC`. To continue the installation, press `More Info` and `Run anyway`. 
+
+When running the installer a the Windows defender might open the Window `Windows protected your PC`. To continue the installation, press `More Info` and `Run anyway`.
 
 ### Linux
 
 DEB files are available for Ubuntu 22.04, 24.04 and Linux Mint 21.3 at the following links:
+
 - [Ubuntu 22.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.2/pod5viewer_1.0.2_ubuntu22.04.deb "Download pod5Viewer for Ubuntu 22.04")
 - [Ubuntu 24.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.2/pod5viewer_1.0.2_ubuntu24.04.deb "Download pod5Viewer for Ubuntu 24.04")
 - [Linux Mint 21.3](https://github.com/dietvin/pod5Viewer/releases/download/1.0.2/pod5viewer_1.0.2_linuxmint21.3.deb "Download pod5Viewer for Linux Mint 21.3")
@@ -43,27 +45,31 @@ sudo apt install ./pod5viewer_1.0.2_<SYSTEM>.deb
 
 Like the Windows installation, the pod5Viewer can then be opened like any other installed application.
 
-### MacOS
-**COMING SOON**
-
 ### OS-independent
-The pod5Viewer can be installed via the Python packaging index using `pip`. 
+
+The pod5Viewer can be installed via the Python packaging index using `pip`.
 
 Note that when installing the pod5Viewer via pip, it can only be started from the command line. It is not possible to open POD5 files directly from a file browser.
 
 Here we recommend installing the pod5Viewer into a fresh virtual environment via [Conda](https://docs.anaconda.com/miniconda/) or a similar environment manager:
+
 ```bash
 conda create -n p5v python==3.12 
 conda activate p5v
 ```
+
 With the virtual environment active, the pod5Viewer can be installed via pip:
+
 ```bash
 pip install pod5Viewer
 ```
+
 To start the pod5Viewer from a python environment type:
+
 ```bash
 pod5Viewer
 ```
+
 Optionally specify one or more path(s) to POD5 file(s) to open these directly:
 
 ```bash
@@ -73,6 +79,7 @@ pod5Viewer file1.pod5 file2.pod5
 ---
 
 Alternatively, the pod5Viewer can be installed from source:
+
 ```bash
 git clone https://github.com/dietvin/pod5Viewer.git
 cd pod5Viewer
@@ -92,6 +99,7 @@ The pod5Viewer is built in Python (v3.12.3) and relies on the following packages
 The compliation for Windows was performed using the pyinstaller (v6.8.0) and the Windows installer was created using the Inno Setup Compiler (v6.3.1).
 
 ## Usage
+
 ![overview](./images/pod5Viewer_overview.png)
 
 The pod5Viewer consists of two main panels. On the left side is the file navigator panel and on the right side is the data view panel. Files can be opened individiually by selecting the `Open file(s)...` option in the `File` menu. Alternatively all files in a directory can be opened simultaneously through the `Open directory...` option.
@@ -145,8 +153,10 @@ View signal window:
 - Arrow up: Scroll up
 
 ## Limitations
+
 ### Plotting large amounts of data
-When plotting many reads at a time the figure can become too large for displaying it in the plot window and it may show a white screen only. This is due to limitations of the plotly framework. The limit for this is around 40000 measurements in one plot, if this number is exceeded a warning pops up when opening the plot window. 
+
+When plotting many reads at a time the figure can become too large for displaying it in the plot window and it may show a white screen only. This is due to limitations of the plotly framework. The limit for this is around 40000 measurements in one plot, if this number is exceeded a warning pops up when opening the plot window.
 If a plot does not show, it is recommended to plot fewer reads at a time.
 
 ## License
