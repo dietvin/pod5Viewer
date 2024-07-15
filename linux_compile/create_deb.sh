@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ### --- ADJUST VERSION, SYSTEM, AND SYSTEMVERSION TO MATCH THE SYSTEM: --- ###
-VERSION=1.0.2
+VERSION=1.0.3
 SYSTEM=ubuntu
 SYSTEMVERSION=22.04
 ### ---------------------------------------------------------------------- ###
