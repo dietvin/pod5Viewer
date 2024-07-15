@@ -2,6 +2,8 @@
 
 The pod5Viewer is a Python application that provides a graphical user interface for viewing and navigating through POD5 files. It allows users to open multiple POD5 files, explore their contents, and display detailed data for selected read IDs.
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OFCONDUCT.md) ![GitHub Release](https://img.shields.io/github/v/release/dietvin/pod5Viewer) ![PyPI - Version](https://img.shields.io/pypi/v/pod5Viewer) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/dietvin/pod5Viewer/total)
+
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
@@ -26,7 +28,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
 
 For Windows systems the pod5Viewer can be installed conveniently via the installer. The installer can be downloaded here:
 
-[pod5Viewer-1.0.3-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.0.3/pod5Viewer-1.0.3-Setup.exe "Download pod5Viewer Windows installer")
+[pod5Viewer-1.0.3-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.0.3/pod5Viewer-1.0.3-Setup.exe "Download pod5Viewer Windows installer") 
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
