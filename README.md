@@ -57,7 +57,7 @@ Note that when installing the pod5Viewer via pip, it can only be started from th
 Here we recommend installing the pod5Viewer into a fresh virtual environment via [Conda](https://docs.anaconda.com/miniconda/) or a similar environment manager:
 
 ```bash
-conda create -n p5v python==3.12 
+conda create -n p5v python==3.11 
 conda activate p5v
 ```
 
@@ -91,11 +91,10 @@ pip install .
 
 ### Dependencies
 
-The pod5Viewer is built in Python (v3.12.3) and relies on the following packages:
+The pod5Viewer is built in Python (v3.11.0) and relies on the following packages:
 
 - pod5 (v0.3.10)
 - pyside6 (v6.5.2)
-- setuptools (v70.0.0)
 - plotly (v5.22.0)
 - pyyaml (v6.0.1)
 
@@ -109,13 +108,13 @@ The compliation for Windows was performed using the pyinstaller (v6.8.0) and the
 
 In the pod5Viewer open files from the menu bar in the top via `File > Open file(s)...` (individual file(s)) or `File > Open directory` (all files in a directory). All opened files are shown in the left panel. Expanding an entry shows all reads in a given file by their read ID.
 
-A single click on a read ID opens the entry as a preview (i.e. it gets overwritten once another entry is selected). A double click opens it permanently, so multiple reads can be opened at the same time. Tabs can be closed via the `X` symbol. A tab shows all attributes stored in a pod5 file as key-value pairs. Nested information can be expanded. Values can be selected via double-click and copied to the clipboard. 
+A single click on a read ID opens the entry as a preview (i.e. it gets overwritten once another entry is selected). A double click opens it permanently, so multiple reads can be opened at the same time. Tabs can be closed via the `X` symbol. A tab shows all attributes stored in a pod5 file as key-value pairs. Nested information can be expanded. Values can be selected via double-click and copied to the clipboard.
 
 Opened files and reads can be cleared from the window through `File > Clear`. To exit the app use  `File > Exit`.
 
 ### Viewing signals
 
-Individual current measurement can be inspected via `View > View signal...`. This shows the current values in chunks of 100. Use the scroll bar to scroll through chunks. 
+Individual current measurement can be inspected via `View > View signal...`. This shows the current values in chunks of 100. Use the scroll bar to scroll through chunks.
 
 ### Plotting signals
 
