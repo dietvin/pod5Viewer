@@ -36,7 +36,7 @@ After downloading the installer and following the steps provided, the pod5Viewer
 
 ### Linux
 
-DEB files are available for Ubuntu 22.04, 24.04 and Linux Mint 21.3 at the following links:
+DEB files are available for Ubuntu 22.04 & 24.04 and Linux Mint 20.3 & 21.3 at the following links:
 
 - [Ubuntu 22.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.3/pod5viewer_1.0.3_ubuntu22.04.deb "Download pod5Viewer for Ubuntu 22.04")
 - [Ubuntu 24.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.3/pod5viewer_1.0.3_ubuntu24.04.deb "Download pod5Viewer for Ubuntu 24.04")
