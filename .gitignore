@@ -179,3 +179,5 @@ linux_compile/dist/
 
 *.exe
 *.dmg
+
+macos_compile/
