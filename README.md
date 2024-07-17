@@ -166,4 +166,4 @@ If a plot does not show, it is recommended to plot fewer reads at a time.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+This project is licensed under the GPL3.0 License. See the [LICENSE](./LICENSE) file for details.
