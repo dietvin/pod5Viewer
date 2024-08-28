@@ -10,11 +10,13 @@ try:
     from pod5Viewer.__version__ import __version__
     from pod5Viewer.dataHandler import DataHandler
     from pod5Viewer.viewWindows import ArrayTableViewer, PlotViewer
+    from pod5Viewer.fileNavigator import FileNavigator
 except ModuleNotFoundError:
     from help_strings import HELP
     from __version__ import __version__
     from dataHandler import DataHandler
     from viewWindows import ArrayTableViewer, PlotViewer
+    from fileNavigator import FileNavigator
 
 # needed to work on Linux Mint...
 if platform.system() == 'Linux':
@@ -45,9 +47,6 @@ class Pod5Viewer(QMainWindow):
 
         load_files(file_paths: List[str]):
             Loads POD5 files and populates the file navigator.
-
-        fill_file_navigator(id_path_dict: Dict[str, List[str]]):
-            Populates the file navigator with file paths and read IDs.
 
         fill_data_viewer(read_id: QTreeWidgetItem):
             Populates the data viewer with detailed data for the selected read ID.
@@ -143,8 +142,7 @@ class Pod5Viewer(QMainWindow):
         self.setCentralWidget(container)
 
         # left column to choose file and id
-        self.file_navigator = QTreeWidget()
-        self.file_navigator.setHeaderHidden(True)
+        self.file_navigator = FileNavigator()
         self.file_navigator.itemSelectionChanged.connect(self.on_tree_selection_changed)
         self.file_navigator.itemDoubleClicked.connect(self.add_proper_tab)
         self.file_navigator.itemActivated.connect(self.add_proper_tab)
@@ -348,36 +346,11 @@ class Pod5Viewer(QMainWindow):
         Args:
             file_paths (List[str]): A list of file paths to POD5 files to be loaded.
         """
-        # clear the file navigator and data viewer
-        self.file_navigator.clear()
-        self.model = QStandardItemModel()
-        self.data_tab_viewer.clear()
-        self.data_viewer_data = []
-
         paths_as_path = [pathlib.Path(i) for i in file_paths]
         self.data_handler = DataHandler(paths_as_path)
-
         file_navigator_data = self.data_handler.ids_to_path()
-        self.fill_file_navigator(file_navigator_data)
 
-
-    def fill_file_navigator(self, id_path_dict: Dict[str, List[str]]):
-        """
-        Populates the file navigator with file paths and their associated read IDs.
-
-        Args:
-            id_path_dict (Dict[str, List[str]]): A dictionary mapping file paths to lists of read IDs.
-        """
-        for path, items in id_path_dict.items():
-            path_item = QTreeWidgetItem([path])
-            path_item.setToolTip(0,path)
-            self.file_navigator.addTopLevelItem(path_item)
-
-            
-            for id_item in items:
-                id_tree_item = QTreeWidgetItem([id_item])
-                path_item.addChild(id_tree_item)
-
+        self.file_navigator.load_data(file_navigator_data)
 
     def on_tree_selection_changed(self) -> None:
         """
