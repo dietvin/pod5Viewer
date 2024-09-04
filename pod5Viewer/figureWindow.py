@@ -547,6 +547,7 @@ class FigureWindow(QMainWindow):
         layout = QGridLayout()
 
         self.subset_label = QLabel()
+        self.subset_label.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         zoom_label = QLabel(text="Options for zooming below:")
         # set up input widgets and buttons for zooming
