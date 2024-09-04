@@ -549,7 +549,7 @@ class FigureWindow(QMainWindow):
         self.subset_label = QLabel()
         self.subset_label.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        zoom_label = QLabel(text="Options for zooming below:")
+        zoom_label = QLabel(text=ZOOM_LABEL_TEXT)
         # set up input widgets and buttons for zooming
         self.zoom_selection_x1_input = QLineEdit()
         self.zoom_selection_x1_input.setPlaceholderText("From...")

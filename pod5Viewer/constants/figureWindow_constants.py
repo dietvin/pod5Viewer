@@ -13,9 +13,10 @@ LEGEND_CHECKBOX_SIZE = (20, 20)
 EXPORT_FIG_SIZE = (10, 6)
 
 LABEL_PA_SUFFIX = "[pA]"
-
+ZOOM_LABEL_TEXT = "Options for zooming below:"
 ERROR_INVALID_ZOOM_INPUT = "Invalid input - only full numbers are allowed."
 MESSAGE_NO_SUBSETTING = "No subsetting performed - each point corresponds to one measurement."
+
 HELP_TEXT = """
 <center>
     <b>Usage of the figure window</b>
