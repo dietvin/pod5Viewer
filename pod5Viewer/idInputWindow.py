@@ -1,11 +1,8 @@
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, 
+    QMainWindow, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, 
     QFileDialog, QMessageBox, QLabel, QWidget
 )
 from PySide6.QtCore import Signal
-
-import sys
-import re
 from typing import List
 from constants.idInputWindow_constants import *
 
@@ -58,17 +55,17 @@ class IDInputWindow(QMainWindow):
         layout.addLayout(button_layout)
 
         # Button to load IDs from a file
-        load_button = QPushButton(LOAD_BUTTON_TEXT)
+        load_button = QPushButton("Load IDs from File")
         load_button.clicked.connect(self.load_ids_from_file)
         button_layout.addWidget(load_button)
 
         # Button to clear the text input
-        clear_button = QPushButton(CLEAR_BUTTON_TEXT)
+        clear_button = QPushButton("Clear")
         clear_button.clicked.connect(self.clear_ids)
         button_layout.addWidget(clear_button)
         
         # Button to submit the IDs
-        submit_button = QPushButton(SUBMIT_BUTTON_TEXT)
+        submit_button = QPushButton("Done")
         submit_button.clicked.connect(self.submitted)
         button_layout.addWidget(submit_button)
     
