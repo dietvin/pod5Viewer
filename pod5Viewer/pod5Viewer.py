@@ -12,6 +12,7 @@ try:
     from pod5Viewer.viewWindow import ArrayTableViewer
     from pod5Viewer.fileNavigator import FileNavigator
     from pod5Viewer.figureWindow import FigureWindow
+    from pod5Viewer.idInputWindow import IDInputWindow
 except ModuleNotFoundError:
     from help_strings import HELP
     from __version__ import __version__
@@ -19,6 +20,7 @@ except ModuleNotFoundError:
     from viewWindow import ArrayTableViewer
     from fileNavigator import FileNavigator
     from figureWindow import FigureWindow
+    from idInputWindow import IDInputWindow
 
 # needed to work on Linux Mint...
 if platform.system() == 'Linux':
@@ -56,6 +58,7 @@ class Pod5Viewer(QMainWindow):
         populate_data_viewer(parent: QStandardItem, data: Dict[str, Any]):
             Recursively populates the data viewer with hierarchical data.
     """
+    reads_of_interest: List[str] | None
 
     def __init__(self, file_paths: List[str]|None = None) -> None:
         """
@@ -99,6 +102,9 @@ class Pod5Viewer(QMainWindow):
         main_menu.addAction("Open directory...", self.select_directory)
         main_menu.addSeparator()
 
+        main_menu.addAction("Filter reads...", self.open_id_input_window)
+        main_menu.addSeparator()
+
         export_menu = main_menu.addMenu("Export")
         export_menu.addAction("Export current read...", self.export_current_read)
         export_menu.addAction("Export all opened reads...", self.export_all_opened_reads)
@@ -128,6 +134,10 @@ class Pod5Viewer(QMainWindow):
         help_menu.addAction("Shortcuts", self.show_shortcuts)
         help_menu.addSeparator()
         help_menu.addAction("About", self.show_about)
+
+        self.id_input_window = IDInputWindow()
+        self.id_input_window.submitted.connect(self.update_reads_of_interest)
+        self.reads_of_interest = None
 
         self.info_dialog = QMessageBox()
         self.info_dialog.setWindowIcon(self.icon)
@@ -349,6 +359,27 @@ class Pod5Viewer(QMainWindow):
 
         self.file_navigator.load_data(file_navigator_data)
 
+    def open_id_input_window(self) -> None:
+        """
+        Opens the IDInputWindow window for read filtering. If no data was loaded it shows 
+        a warning message instead of opening it. This ensures that no filtering can be started
+        before loading data.
+        """
+        if self.file_navigator.contains_data():
+            self.id_input_window.show()
+        else:
+            QMessageBox.warning(self, 
+                                "No data loaded", 
+                                "Read ID filtering works only after loading data.")
+    
+    def update_reads_of_interest(self) -> None:
+        """
+        Update the reads_of_interest attribute based on the input given in the read ID filtering window. 
+        Redirects the given selection to the file navigator to update the shown read ID.
+        """
+        self.reads_of_interest = self.id_input_window.get_ids()
+        self.file_navigator.update_reads_of_interest(self.reads_of_interest)
+
     def on_tree_selection_changed(self) -> None:
         """
         Callback method triggered when the selection in the tree view changes.
@@ -362,7 +393,6 @@ class Pod5Viewer(QMainWindow):
         if selected_items:
             item = selected_items[0]
             self.update_preview_tab(item)
-
 
     def update_preview_tab(self, item: QTreeWidgetItem):
         """
