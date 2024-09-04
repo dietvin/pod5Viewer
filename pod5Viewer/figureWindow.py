@@ -9,6 +9,8 @@ from typing import Dict, Tuple
 import itertools, math, copy
 from datetime import datetime
 
+from constants.figureWindow_constants import *
+
 class OverviewWidget(QWidget):
     """
     A widget that provides an overview of data samples with zooming capabilities.
@@ -93,7 +95,7 @@ class OverviewWidget(QWidget):
         self.x_vals = list(data.values())[0][0]
         data_len = len(self.x_vals) # arrays from all reads have the same length, because they were filled with NAs
 
-        bin_count = 1000
+        bin_count = OVERVIEW_BIN_COUNT
         bin_size = max(1, int(data_len / bin_count))
         
         max_y_vals = []
@@ -158,19 +160,7 @@ class OverviewWidget(QWidget):
         painter.setPen(QPen(Qt.black, 1))  # Set pen to black with width 2
         painter.drawRect(self.rect().adjusted(1, 1, -1, -1))  # Draw rectangle around the widget
 
-        # paint the signals
-        for _, (time, signal, color) in self.data_scaled.items():
-            # pA signals are of type np.float32 which causes errors when drawing the line
-            time = time.astype(np.float64)
-            signal = signal.astype(np.float64)
-            for i in range(len(time)-1):
-                x1 = time[i]
-                y1 = signal[i]
-                x2 = time[i+1]
-                y2 = signal[i+1]
-                if not np.isnan([y1,y2]).any():
-                    painter.setPen(QColor(color))
-                    painter.drawLine(x1, y1, x2, y2)
+        self.paint_signals(painter)
 
         # paint the grey rectangles that indicates the outside of the currently zoomed in interval
         if self.current_start_pos and self.current_end_pos:
@@ -192,6 +182,21 @@ class OverviewWidget(QWidget):
             rect = QRect(QPoint(x_start,0), QPoint(x_end, self.height()))
             painter.setPen(QPen(Qt.black, 3, Qt.DashLine))
             painter.drawRect(rect)
+
+    def paint_signals(self, painter: QPainter) -> None:
+        for _, (time, signal, color) in self.data_scaled.items():
+            # pA signals are of type np.float32 which causes errors when drawing the line
+            time = time.astype(np.float64)
+            signal = signal.astype(np.float64)
+            for i in range(len(time)-1):
+                x1 = time[i]
+                y1 = signal[i]
+                x2 = time[i+1]
+                y2 = signal[i+1]
+                if not np.isnan([y1,y2]).any():
+                    painter.setPen(QColor(color))
+                    painter.drawLine(x1, y1, x2, y2)
+
 
     def resizeEvent(self, event) -> None:
         """
@@ -400,10 +405,12 @@ class FigureWindow(QMainWindow):
         Args:
             data (Dict[str, np.ndarray]): Dictionary containing raw time series data.
         """
+        if len(data.keys()) < 1:
+            raise ValueError("Provided empty data dict.")
+        
         data_sorted = dict(sorted(data.items(), key=lambda item: len(item[1]), reverse=True))
 
-        colors = itertools.cycle(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd",
-                                  "#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"])
+        colors = itertools.cycle(COLOR_CYCLE)
         
         max_len = max([len(s) for s in data_sorted.values()])
 
@@ -439,16 +446,51 @@ class FigureWindow(QMainWindow):
         Returns:
             np.ndarray: Normalized data.
         """
-        return (data - np.nanmean(data)) / np.nanstd(data)
+        try:
+            norm_data = (data - np.nanmean(data)) / np.nanstd(data)
+        except:
+            norm_data = np.zeros(len(data))
+        return norm_data
 
     def init_ui(self) -> None:
         """
         Initializes the user interface components including menu bar, Matplotlib canvas, zoom controls, and layout.
         """
-        self.setWindowTitle("PySide6 Plotting Application")
-        self.setGeometry(100, 100, 800, 600)
+        self.setWindowTitle(WINDOW_TITLE)
+        self.setGeometry(*WINDOW_GEOMETRY)
 
         # Set up the menu bar
+        self.init_menubar()
+
+        # Create the Matplotlib canvas
+        self.fig, self.ax = plt.subplots()
+        self.canvas = FigureCanvas(self.fig)
+        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        # set up layout and checkboxes for the legend and fill the layout with them 
+        legend_widget = self.init_legend()
+        legend_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        # set up and fill main layout 
+        self.main_layout = QVBoxLayout()
+
+        top_layout = QHBoxLayout()
+        top_layout.addWidget(self.canvas)
+        top_layout.addWidget(legend_widget)
+
+        bottom_layout = self.init_zoom_area()
+
+        self.main_layout.addLayout(top_layout)
+        self.main_layout.addLayout(bottom_layout)
+
+        main_widget = QWidget()
+        main_widget.setLayout(self.main_layout)
+        self.setCentralWidget(main_widget)
+
+    def init_menubar(self) -> None:
+        """
+        Initialize the menu bar.
+        """
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False) # activate menu bar on MacOS
         data_menu = menubar.addMenu("&Data")
@@ -458,11 +500,10 @@ class FigureWindow(QMainWindow):
         export_menu.addAction("Export current view...", self.export_current_view)
         menubar.addAction("&Help", self.show_help)
 
-        # Create the Matplotlib canvas
-        self.fig, self.ax = plt.subplots()
-        self.canvas = FigureCanvas(self.fig)
-
-        # set up layout and checkboxes for the legend and fill the layout with them 
+    def init_legend(self) -> QScrollArea:
+        """
+        Initialize the legend.
+        """
         legend_widget = QScrollArea()
         legend_widget.setStyleSheet("""
             QScrollArea { 
@@ -489,7 +530,7 @@ class FigureWindow(QMainWindow):
             legend_label.setChecked(is_selected)
             # add icon with the color from the plot as an idicator
             color = self.data[read_id][2]
-            color_icon = QPixmap(20, 20)
+            color_icon = QPixmap(*LEGEND_CHECKBOX_SIZE)
             color_icon.fill(QColor(color))
             legend_label.setIcon(color_icon)
             # connect signal when toggled
@@ -497,7 +538,10 @@ class FigureWindow(QMainWindow):
             legend_layout.addWidget(legend_label)
         legend_contents.setLayout(legend_layout)
         legend_widget.setWidget(legend_contents)
+        return legend_widget
 
+    def init_zoom_area(self) -> QGridLayout:
+        layout = QGridLayout()
 
         zoom_label = QLabel(text="Options for zooming below:")
         # set up input widgets and buttons for zooming
@@ -514,44 +558,24 @@ class FigureWindow(QMainWindow):
         else:
             self.overview_widget.set_data(self.data)
 
+        layout.addWidget(zoom_label)
+        layout.addWidget(self.overview_widget, 1, 0, 1,-1)
+        layout.addWidget(self.zoom_selection_x1_input, 2, 0)
+        layout.addWidget(self.zoom_selection_x2_input, 2, 1)
+        layout.addWidget(zoom_selection_enter_button, 2, 2)
+        layout.addWidget(zoom_reset_button, 2, 3)
 
-        # Modify canvas widget
-        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        # Modify legend widget
-        legend_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        # set up and fill main layout 
-        self.main_layout = QVBoxLayout()
-
-        top_layout = QHBoxLayout()
-        bottom_layout = QGridLayout()
-
-        top_layout.addWidget(self.canvas)
-        top_layout.addWidget(legend_widget)
-
-        bottom_layout.addWidget(zoom_label)
-        bottom_layout.addWidget(self.overview_widget, 1, 0, 1,-1)
-        bottom_layout.addWidget(self.zoom_selection_x1_input, 2, 0)
-        bottom_layout.addWidget(self.zoom_selection_x2_input, 2, 1)
-        bottom_layout.addWidget(zoom_selection_enter_button, 2, 2)
-        bottom_layout.addWidget(zoom_reset_button, 2, 3)
-
-        bottom_layout.setColumnStretch(0, 10)
-        bottom_layout.setColumnStretch(1, 10)
-        bottom_layout.setColumnStretch(2, 5)
-        bottom_layout.setColumnStretch(3, 5)
-     
-        self.main_layout.addLayout(top_layout)
-        self.main_layout.addLayout(bottom_layout)
-
-        main_widget = QWidget()
-        main_widget.setLayout(self.main_layout)
-        self.setCentralWidget(main_widget)
+        layout.setColumnStretch(0, 10)
+        layout.setColumnStretch(1, 10)
+        layout.setColumnStretch(2, 5)
+        layout.setColumnStretch(3, 5)
 
         # connect signals
         self.overview_widget.zoom_range_changed.connect(self.update_plot)
         zoom_selection_enter_button.pressed.connect(self.zoom_in)
         zoom_reset_button.pressed.connect(self.reset_zoom)
+
+        return layout
 
     def show_help(self) -> None:
         """
@@ -559,28 +583,7 @@ class FigureWindow(QMainWindow):
         """
         help_dialog = QMessageBox()
         help_dialog.setWindowTitle("Help")
-        help_text = f"""    
-            <center>
-                <b>Usage of the figure window</b>
-            </center>
-            <p>
-                The figure Window consists of three elements:
-                <ol>
-                    <li>The figure itself (top left)</li>
-                    <li>A legend (top right)</li>
-                    <li>The zoom selection (bottom)</li>
-                </ol>
-                Uncheck elements in the legend to hide them in the figure. For zooming, either select 
-                a range in the preview of the figure or for more precise selections use type the range
-                in the input fields below and press the zoom button. The reset zoom button reverts it
-                back to the initial view.
-                <br><br>
-                Use the data menu to switch between normalized and unnormalized data shown in the plot.
-                <br><br>
-                Use the Export menu to save the figure.
-            </p>
-            """
-        help_dialog.setText(help_text)
+        help_dialog.setText(HELP_TEXT)
         help_dialog.setWindowTitle("Shortcuts")
         help_dialog.exec()
 
@@ -595,29 +598,24 @@ class FigureWindow(QMainWindow):
         """
         self.ax.clear()
 
-        data_used = self.data_norm if self.show_norm else self.data
+        def subsample_data(x, y) -> Tuple[np.ndarray, np.ndarray]:
+            bin_size = max(1, int(len(x) / SUBSAMPLE_BIN_COUNT))
+            x_subsampled = x[::bin_size]
+            y_subsampled = np.array([np.median(y[i:i+bin_size]) for i in range(0, len(y), bin_size)])
+            return x_subsampled, y_subsampled
 
-        for read_id, (x, y, c) in data_used.items():
+        for read_id, (x, y, c) in self.get_current_data().items():
             if self.legend_selected[read_id]:
                 start_idx = math.floor(len(x) * start_ratio)
                 end_idx = math.ceil(len(x) * end_ratio)
-
-                visible_x = x[start_idx:end_idx]
-                visible_y = y[start_idx:end_idx]
-
-                bin_count = 5000
-                bin_size = max(1, int(len(visible_x) / bin_count))
-                visible_x = visible_x[::bin_size]
-                visible_y = [np.median(visible_y[i:i+bin_size]) for i in range(0, len(visible_y), bin_size)]
-
+                visible_x, visible_y = subsample_data(x[start_idx:end_idx], y[start_idx:end_idx])
                 self.ax.plot(visible_x, visible_y, c=c, label=read_id)
 
-                pa_suffix = "[pA]" if self.in_pa else ""
-                y_label = f"Signal intensity {pa_suffix}" if not self.show_norm else f"Norm. signal intensity {pa_suffix}"
-                self.ax.set_ylabel(y_label)
+        pa_suffix = LABEL_PA_SUFFIX if self.in_pa else ""
+        y_label = f"{'Norm. ' if self.show_norm else ''}Signal intensity {pa_suffix}"
+        self.ax.set_ylabel(y_label)
+        self.fig.tight_layout()
 
-                self.fig.tight_layout()
-        # self.ax.set_xlim(visible_time[0], visible_time[-1])
         self.canvas.draw()
 
         self.current_start_ratio = start_ratio
@@ -653,7 +651,7 @@ class FigureWindow(QMainWindow):
                 x1 = int(x1)
                 x2 = int(x2)
             except ValueError:
-                QMessageBox.critical(self, "Error", "Invalid input - only full numbers are allowed.")
+                QMessageBox.critical(self, "Error", ERROR_INVALID_ZOOM_INPUT)
             else:
                 self.overview_widget.set_zoom(x1, x2)
 
@@ -672,16 +670,27 @@ class FigureWindow(QMainWindow):
             show_norm (bool, optional): If True, displays normalized data. If False, displays raw data. Defaults to False.
         """
         self.show_norm = show_norm
-        if self.show_norm:
-            self.overview_widget.set_data(self.data_norm) 
-        else:
-            self.overview_widget.set_data(self.data) 
+        self.overview_widget.set_data(self.get_current_data())
 
         if self.current_start_ratio and self.current_end_ratio:
             self.update_plot(self.current_start_ratio, self.current_end_ratio)
         else:
             self.update_plot()
 
+    def get_current_data(self) -> Dict[str, Tuple[np.ndarray, np.ndarray, str]]:
+        """
+        Helper function that selects the data attribute that is currently selected to be shown
+        (Normalized or unnormalized).
+
+        Returns:
+            Dict[str, Tuple[np.ndarray, np.ndarray, str]]: Dict containing the x-values, y-values 
+                                                           and the color for each signal. 
+        """
+        if self.show_norm:
+            current_data = self.data_norm
+        else:
+            current_data = self.data
+        return current_data
 
     def export_current_view(self) -> None:
         """
@@ -694,17 +703,21 @@ class FigureWindow(QMainWindow):
 
         dialog = QFileDialog(self, "Export current view")
         dialog.selectFile(filename)
+
         if dialog.exec():
-            print(dialog.selectedFiles())
             outpath = dialog.selectedFiles()[0]
+            try:
 
-            fig = copy.deepcopy(self.fig)
-            fig.set_size_inches(10,6)
-            ax = fig.get_axes()[0]
-            ax.legend(bbox_to_anchor=(1,1))
+                fig = copy.deepcopy(self.fig)
+                fig.set_size_inches(*EXPORT_FIG_SIZE)
+                ax = fig.get_axes()[0]
+                ax.legend(bbox_to_anchor=(1,1))
 
-            fig.tight_layout()
-            fig.savefig(outpath)
+                fig.tight_layout()
+                fig.savefig(outpath)
+            except PermissionError:
+                QMessageBox.critical(self, "Permission error", 
+                                     f"Figure could not be exported. You do not have permissions to write to path {outpath}")
 
 
 import string, random, sys
