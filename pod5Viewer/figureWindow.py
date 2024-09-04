@@ -197,7 +197,6 @@ class OverviewWidget(QWidget):
                     painter.setPen(QColor(color))
                     painter.drawLine(x1, y1, x2, y2)
 
-
     def resizeEvent(self, event) -> None:
         """
         Handles the resize event by scaling the data and updating the widget.
@@ -543,6 +542,8 @@ class FigureWindow(QMainWindow):
     def init_zoom_area(self) -> QGridLayout:
         layout = QGridLayout()
 
+        self.subset_label = QLabel()
+
         zoom_label = QLabel(text="Options for zooming below:")
         # set up input widgets and buttons for zooming
         self.zoom_selection_x1_input = QLineEdit()
@@ -558,7 +559,8 @@ class FigureWindow(QMainWindow):
         else:
             self.overview_widget.set_data(self.data)
 
-        layout.addWidget(zoom_label)
+        layout.addWidget(zoom_label, 0, 0)
+        layout.addWidget(self.subset_label, 0, 2, 1, 2)
         layout.addWidget(self.overview_widget, 1, 0, 1,-1)
         layout.addWidget(self.zoom_selection_x1_input, 2, 0)
         layout.addWidget(self.zoom_selection_x2_input, 2, 1)
@@ -600,6 +602,9 @@ class FigureWindow(QMainWindow):
 
         def subsample_data(x, y) -> Tuple[np.ndarray, np.ndarray]:
             bin_size = max(1, int(len(x) / SUBSAMPLE_BIN_COUNT))
+            
+            self.update_subset_label(bin_size)
+
             x_subsampled = x[::bin_size]
             y_subsampled = np.array([np.median(y[i:i+bin_size]) for i in range(0, len(y), bin_size)])
             return x_subsampled, y_subsampled
@@ -661,6 +666,13 @@ class FigureWindow(QMainWindow):
         """
         self.update_plot()
         self.overview_widget.reset_zoom()
+
+    def update_subset_label(self, bin_size: int):
+        if bin_size <= 1:
+            message = MESSAGE_NO_SUBSETTING
+        else:
+            message = f"Subsetting active - one point corresponds to {bin_size} measurements."
+        self.subset_label.setText(message)
 
     def show_data(self, show_norm: bool = False) -> None:
         """
@@ -730,7 +742,7 @@ def randomword(length) -> str:
 def generate_dummy_data(n: int):
     data = {}
     for _ in range(n):
-        data[randomword(10)] = np.random.random(random.randint(1000,20000)) + random.randint(-3,3)
+        data[randomword(10)] = np.random.random(random.randint(10000,110000)) + random.randint(-3,3)
     return data
 
 
