@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QVBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QKeySequence, QShortcut, QIcon
 from PySide6.QtCore import Qt
 import sys, os, pathlib, yaml, traceback, platform
@@ -9,14 +9,14 @@ try:
     from pod5Viewer.help_strings import HELP
     from pod5Viewer.__version__ import __version__
     from pod5Viewer.dataHandler import DataHandler
-    from pod5Viewer.viewWindows import ArrayTableViewer, PlotViewer
+    from pod5Viewer.viewWindow import ArrayTableViewer
     from pod5Viewer.fileNavigator import FileNavigator
     from pod5Viewer.figureWindow import FigureWindow
 except ModuleNotFoundError:
     from help_strings import HELP
     from __version__ import __version__
     from dataHandler import DataHandler
-    from viewWindows import ArrayTableViewer, PlotViewer
+    from viewWindow import ArrayTableViewer
     from fileNavigator import FileNavigator
     from figureWindow import FigureWindow
 
