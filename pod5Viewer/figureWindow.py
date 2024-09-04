@@ -1,7 +1,7 @@
 import numpy as np
 from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QPushButton, QScrollArea, QSizePolicy, QLabel, QLineEdit, QMessageBox, QCheckBox, QFileDialog
 from PySide6.QtCore import Qt, Signal, QPoint, QRect
-from PySide6.QtGui import QCursor, QPainter, QPen, QMouseEvent, QColor, QPixmap
+from PySide6.QtGui import QCursor, QPainter, QPen, QMouseEvent, QColor, QPixmap, QKeySequence, QShortcut
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -389,6 +389,10 @@ class FigureWindow(QMainWindow):
 
         self.init_data(data)
         self.init_ui()
+
+        # Ctrl+Q: Exit application
+        exit_shortcut = QShortcut(QKeySequence("Ctrl+Q"), self)
+        exit_shortcut.activated.connect(self.close)
 
         # to keep track of the zoom in case the plot gets redrawn when a line gets disabled
         self.current_start_ratio = None
