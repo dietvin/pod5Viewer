@@ -11,12 +11,14 @@ try:
     from pod5Viewer.dataHandler import DataHandler
     from pod5Viewer.viewWindows import ArrayTableViewer, PlotViewer
     from pod5Viewer.fileNavigator import FileNavigator
+    from pod5Viewer.figureWindow import FigureWindow
 except ModuleNotFoundError:
     from help_strings import HELP
     from __version__ import __version__
     from dataHandler import DataHandler
     from viewWindows import ArrayTableViewer, PlotViewer
     from fileNavigator import FileNavigator
+    from figureWindow import FigureWindow
 
 # needed to work on Linux Mint...
 if platform.system() == 'Linux':
@@ -121,11 +123,6 @@ class Pod5Viewer(QMainWindow):
         plot_pa_signal_menu = view_menu.addMenu("Plot pA signal...")
         plot_pa_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(in_pa=True, single=True))
         plot_pa_signal_menu.addAction("All open reads...", lambda: self.plot_signal(in_pa=True, single=False))
-
-        plot_norm_signal_menu = view_menu.addMenu("Plot normalized signal...")
-        plot_norm_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(single=True, norm=True))
-        plot_norm_signal_menu.addAction("All open reads...", lambda: self.plot_signal(single=False, norm=True))
-
 
         help_menu = menubar.addMenu("&Help")
         help_menu.addAction("Shortcuts", self.show_shortcuts)
@@ -618,7 +615,7 @@ class Pod5Viewer(QMainWindow):
             self.data_view_window.setWindowIcon(self.icon)
             self.data_view_window.show()
 
-    def plot_signal(self, in_pa: bool = False, single: bool = True, norm: bool = False) -> None:
+    def plot_signal(self, in_pa: bool = False, single: bool = True) -> None:
         """
         Plots the signal data for the selected read(s) and opens a new window to display the plot.
 
@@ -642,7 +639,7 @@ class Pod5Viewer(QMainWindow):
             if self.plot_window:
                 self.plot_window.close()
                 
-            self.plot_window = PlotViewer(plot_data, in_pa=in_pa, norm=norm)
+            self.plot_window = FigureWindow(plot_data, in_pa=in_pa)
             self.plot_window.setWindowIcon(self.icon)
             self.plot_window.show()
 
