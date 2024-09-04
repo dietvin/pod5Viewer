@@ -1,5 +1,5 @@
 import numpy as np
-from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QPushButton, QFrame, QScrollArea, QSizePolicy, QLabel, QLineEdit, QMessageBox, QCheckBox, QFileDialog
+from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QPushButton, QScrollArea, QSizePolicy, QLabel, QLineEdit, QMessageBox, QCheckBox, QFileDialog
 from PySide6.QtCore import Qt, Signal, QPoint, QRect
 from PySide6.QtGui import QCursor, QPainter, QPen, QMouseEvent, QColor, QPixmap
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -380,14 +380,6 @@ class FigureWindow(QMainWindow):
         """
         super().__init__()
 
-
-        self.setStyleSheet("""
-            QScrollArea { 
-                border: none; 
-                }
-            """)
-
-
         self.in_pa = in_pa
         self.show_norm = False
 
@@ -456,37 +448,35 @@ class FigureWindow(QMainWindow):
         self.setWindowTitle("PySide6 Plotting Application")
         self.setGeometry(100, 100, 800, 600)
 
+        # Set up the menu bar
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False) # activate menu bar on MacOS
-
         data_menu = menubar.addMenu("&Data")
-        data_menu.addAction("Plot normalized data", lambda: self.show_data(show_norm=True))
-        data_menu.addAction("Plot data", self.show_data)
-
+        data_menu.addAction("Show normalized data", lambda: self.show_data(show_norm=True))
+        data_menu.addAction("Show data", self.show_data)
         export_menu = menubar.addMenu("&Export")
         export_menu.addAction("Export current view...", self.export_current_view)
+        menubar.addAction("&Help", self.show_help)
 
         # Create the Matplotlib canvas
         self.fig, self.ax = plt.subplots()
         self.canvas = FigureCanvas(self.fig)
 
-        # set up input widgets and buttons for zooming
-        self.zoom_selection_x1_input = QLineEdit()
-        self.zoom_selection_x1_input.setPlaceholderText("From...")
-        self.zoom_selection_x2_input = QLineEdit()
-        self.zoom_selection_x2_input.setPlaceholderText("To...")
-        zoom_selection_enter_button = QPushButton("Zoom")
-        zoom_reset_button = QPushButton("Reset zoom")
-
         # set up layout and checkboxes for the legend and fill the layout with them 
         legend_widget = QScrollArea()
+        legend_widget.setStyleSheet("""
+            QScrollArea { 
+                border: none; 
+                }
+            """)
+
         legend_widget.setAlignment(Qt.AlignVCenter)
         legend_contents = QWidget()
         legend_contents.setStyleSheet("""
             QWidget { border: 1px solid black; }
             QCheckBox { 
                 border: none;
-                margin: 3px;
+                margin: 5px;
                  }
             """)
         legend_layout = QVBoxLayout()
@@ -508,6 +498,15 @@ class FigureWindow(QMainWindow):
         legend_contents.setLayout(legend_layout)
         legend_widget.setWidget(legend_contents)
 
+
+        zoom_label = QLabel(text="Options for zooming below:")
+        # set up input widgets and buttons for zooming
+        self.zoom_selection_x1_input = QLineEdit()
+        self.zoom_selection_x1_input.setPlaceholderText("From...")
+        self.zoom_selection_x2_input = QLineEdit()
+        self.zoom_selection_x2_input.setPlaceholderText("To...")
+        zoom_selection_enter_button = QPushButton("Zoom")
+        zoom_reset_button = QPushButton("Reset zoom")
         # initialize overview widget and fill it with fitting data
         self.overview_widget = OverviewWidget()
         if self.show_norm:
@@ -530,11 +529,12 @@ class FigureWindow(QMainWindow):
         top_layout.addWidget(self.canvas)
         top_layout.addWidget(legend_widget)
 
-        bottom_layout.addWidget(self.overview_widget, 0, 0, 1,-1)
-        bottom_layout.addWidget(self.zoom_selection_x1_input, 1, 0)
-        bottom_layout.addWidget(self.zoom_selection_x2_input, 1, 1)
-        bottom_layout.addWidget(zoom_selection_enter_button, 1, 2)
-        bottom_layout.addWidget(zoom_reset_button, 1, 3)
+        bottom_layout.addWidget(zoom_label)
+        bottom_layout.addWidget(self.overview_widget, 1, 0, 1,-1)
+        bottom_layout.addWidget(self.zoom_selection_x1_input, 2, 0)
+        bottom_layout.addWidget(self.zoom_selection_x2_input, 2, 1)
+        bottom_layout.addWidget(zoom_selection_enter_button, 2, 2)
+        bottom_layout.addWidget(zoom_reset_button, 2, 3)
 
         bottom_layout.setColumnStretch(0, 10)
         bottom_layout.setColumnStretch(1, 10)
@@ -552,6 +552,38 @@ class FigureWindow(QMainWindow):
         self.overview_widget.zoom_range_changed.connect(self.update_plot)
         zoom_selection_enter_button.pressed.connect(self.zoom_in)
         zoom_reset_button.pressed.connect(self.reset_zoom)
+
+    def show_help(self) -> None:
+        """
+        Displays a help .
+        """
+        help_dialog = QMessageBox()
+        help_dialog.setWindowTitle("Help")
+        help_text = f"""    
+            <center>
+                <b>Usage of the figure window</b>
+            </center>
+            <p>
+                The figure Window consists of three elements:
+                <ol>
+                    <li>The figure itself (top left)</li>
+                    <li>A legend (top right)</li>
+                    <li>The zoom selection (bottom)</li>
+                </ol>
+                Uncheck elements in the legend to hide them in the figure. For zooming, either select 
+                a range in the preview of the figure or for more precise selections use type the range
+                in the input fields below and press the zoom button. The reset zoom button reverts it
+                back to the initial view.
+                <br><br>
+                Use the data menu to switch between normalized and unnormalized data shown in the plot.
+                <br><br>
+                Use the Export menu to save the figure.
+            </p>
+            """
+        help_dialog.setText(help_text)
+        help_dialog.setWindowTitle("Shortcuts")
+        help_dialog.exec()
+
 
     def update_plot(self, start_ratio=0.0, end_ratio=1.0) -> None:
         """
@@ -573,7 +605,6 @@ class FigureWindow(QMainWindow):
                 visible_x = x[start_idx:end_idx]
                 visible_y = y[start_idx:end_idx]
 
-                # Subsample the data to 10,000 points using binning
                 bin_count = 5000
                 bin_size = max(1, int(len(visible_x) / bin_count))
                 visible_x = visible_x[::bin_size]
