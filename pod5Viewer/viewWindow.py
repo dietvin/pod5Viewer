@@ -381,12 +381,13 @@ class ArrayTableViewer(QMainWindow):
                 self.export_npy(outpath)
             else:
                 self.export_text(outpath)
+
     def export_npy(self, path: str):
         try:
             np.save(path, self.full_data, allow_pickle=False)
         except PermissionError:
             QMessageBox.critical(self, "Permission error", 
-                                    f"Figure could not be exported. You do not have permissions to write to path {outpath}")
+                                    f"Figure could not be exported. You do not have permissions to write to path {path}")
     
     def export_text(self, path: str):
         try:
@@ -394,7 +395,7 @@ class ArrayTableViewer(QMainWindow):
                 f.write("\n".join(self.full_data.astype(str)))
         except PermissionError:
             QMessageBox.critical(self, "Permission error", 
-                                    f"Figure could not be exported. You do not have permissions to write to path {outpath}")
+                                    f"Figure could not be exported. You do not have permissions to write to path {path}")
 
     def show_help(self) -> None:
         """
