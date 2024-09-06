@@ -586,7 +586,7 @@ class FigureWindow(QMainWindow):
 
     def show_help(self) -> None:
         """
-        Displays a help .
+        Displays a help message.
         """
         help_dialog = QMessageBox()
         help_dialog.setWindowTitle("Help")
@@ -735,26 +735,3 @@ class FigureWindow(QMainWindow):
             except PermissionError:
                 QMessageBox.critical(self, "Permission error", 
                                      f"Figure could not be exported. You do not have permissions to write to path {outpath}")
-
-
-import string, random, sys
-from PySide6.QtWidgets import QApplication
-
-def randomword(length) -> str:
-   letters = string.ascii_lowercase
-   return ''.join(random.choice(letters) for i in range(length))
-
-def generate_dummy_data(n: int):
-    data = {}
-    for _ in range(n):
-        data[randomword(10)] = np.random.random(random.randint(10000,110000)) + random.randint(-3,3)
-    return data
-
-
-if __name__ == "__main__":
-
-    data = generate_dummy_data(10)
-    app = QApplication(sys.argv)
-    window = FigureWindow(data, True)
-    window.show()
-    sys.exit(app.exec())
