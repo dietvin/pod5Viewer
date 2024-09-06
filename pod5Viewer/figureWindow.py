@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout,
 from PySide6.QtCore import Qt, Signal, QPoint, QRect
 from PySide6.QtGui import (QCursor, QPainter, QPen, QMouseEvent, QColor, 
                            QPixmap, QKeySequence, QShortcut)
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from typing import Dict, Tuple
@@ -14,9 +14,17 @@ import itertools, math, copy
 from datetime import datetime
 
 try:
-    from pod5Viewer.constants.figureWindow_constants import *
+    from pod5Viewer.constants.figureWindow_constants import (OVERVIEW_BIN_COUNT, COLOR_CYCLE, SUBSAMPLE_BIN_COUNT, 
+                                                             WINDOW_TITLE, WINDOW_GEOMETRY, LEGEND_CHECKBOX_SIZE, 
+                                                             EXPORT_FIG_SIZE, LABEL_PA_SUFFIX, ZOOM_LABEL_TEXT, 
+                                                             ERROR_INVALID_ZOOM_INPUT, MESSAGE_NO_SUBSETTING, 
+                                                             HELP_TEXT)
 except ModuleNotFoundError:
-    from constants.figureWindow_constants import *
+    from constants.figureWindow_constants import (OVERVIEW_BIN_COUNT, COLOR_CYCLE, SUBSAMPLE_BIN_COUNT, 
+                                                  WINDOW_TITLE, WINDOW_GEOMETRY, LEGEND_CHECKBOX_SIZE, 
+                                                  EXPORT_FIG_SIZE, LABEL_PA_SUFFIX, ZOOM_LABEL_TEXT, 
+                                                  ERROR_INVALID_ZOOM_INPUT, MESSAGE_NO_SUBSETTING, 
+                                                  HELP_TEXT)
 
 
 class OverviewWidget(QWidget):
@@ -77,7 +85,7 @@ class OverviewWidget(QWidget):
         if data: 
             self.set_data(data)
 
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.setMinimumHeight(100)
 
         self.zoom_start_pos = None
@@ -165,7 +173,7 @@ class OverviewWidget(QWidget):
         painter = QPainter(self)
 
         # Draw the border
-        painter.setPen(QPen(Qt.black, 1))  # Set pen to black with width 2
+        painter.setPen(QPen(Qt.GlobalColor.black, 1))  # Set pen to black with width 2
         painter.drawRect(self.rect().adjusted(1, 1, -1, -1))  # Draw rectangle around the widget
 
         self.paint_signals(painter)
@@ -188,7 +196,7 @@ class OverviewWidget(QWidget):
             x_start = min(self.zoom_start_pos, self.zoom_end_pos)
             x_end = max(self.zoom_start_pos, self.zoom_end_pos)
             rect = QRect(QPoint(x_start,0), QPoint(x_end, self.height()))
-            painter.setPen(QPen(Qt.black, 3, Qt.DashLine))
+            painter.setPen(QPen(Qt.GlobalColor.black, 3, Qt.PenStyle.DashLine))
             painter.drawRect(rect)
 
     def paint_signals(self, painter: QPainter) -> None:
@@ -222,9 +230,9 @@ class OverviewWidget(QWidget):
         Args:
             event (QMouseEvent): The mouse press event.
         """
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.zoom_start_pos = event.pos().x()
-            self.setCursor(QCursor(Qt.CrossCursor))
+            self.setCursor(QCursor(Qt.CursorShape.CrossCursor))
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         """
@@ -252,8 +260,8 @@ class OverviewWidget(QWidget):
         Args:
             event (QMouseEvent): The mouse release event.
         """
-        if self.zoom_start_pos and event.button() == Qt.LeftButton:
-            self.setCursor(QCursor(Qt.ArrowCursor))
+        if self.zoom_start_pos and event.button() == Qt.MouseButton.LeftButton:
+            self.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
 
             start_x = min(self.zoom_start_pos, event.pos().x())
             end_x = max(self.zoom_start_pos, event.pos().x())
@@ -476,11 +484,11 @@ class FigureWindow(QMainWindow):
         # Create the Matplotlib canvas
         self.fig, self.ax = plt.subplots()
         self.canvas = FigureCanvas(self.fig)
-        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         # set up layout and checkboxes for the legend and fill the layout with them 
         legend_widget = self.init_legend()
-        legend_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        legend_widget.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         # set up and fill main layout 
         self.main_layout = QVBoxLayout()
@@ -522,7 +530,7 @@ class FigureWindow(QMainWindow):
                 }
             """)
 
-        legend_widget.setAlignment(Qt.AlignVCenter)
+        legend_widget.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         legend_contents = QWidget()
         legend_contents.setStyleSheet("""
             QWidget { border: 1px solid black; }
