@@ -222,17 +222,17 @@ class FileNavigator(QWidget):
 
         if search_active and read_filter_active: 
             # both active -> read is hidden if only one or both do not fit
-            not_fits_search = not item_str.startswith(self.search_string)
-            not_in_reads_of_interest = not item_str in self.reads_of_interest
+            not_fits_search = not item_str.startswith(self.search_string) # type: ignore if statement checks if not None
+            not_in_reads_of_interest = not item_str in self.reads_of_interest # type: ignore read_filter_active ensures not None
             return not_fits_search or not_in_reads_of_interest
         
         elif search_active: 
              # only search active -> read is hidden if the search string does not fit
-             return not item_str.startswith(self.search_string)
+             return not item_str.startswith(self.search_string) # type: ignore if statement checks if not None
         
         elif read_filter_active:
             # only read filter active -> read is hidden if it is not one of the reads of interest
-            return not item_str in self.reads_of_interest
+            return not item_str in self.reads_of_interest # type: ignore read_filter_active ensures not None
         
         else: 
             # neither is active -> all reads are shown
