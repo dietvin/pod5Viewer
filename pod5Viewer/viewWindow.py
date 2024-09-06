@@ -9,9 +9,11 @@ from typing import List
 import math
 
 try:
-    from pod5Viewer.constants.viewWindow_constants import *
+    from pod5Viewer.constants.viewWindow_constants import (NUM_DECIMALS, CELL_WIDTH, CELL_HEIGHT, 
+                                                           WINDOW_GEOMETRY, HELP_TEXT)
 except ModuleNotFoundError:
-    from constants.viewWindow_constants import *
+    from constants.viewWindow_constants import (NUM_DECIMALS, CELL_WIDTH, CELL_HEIGHT, 
+                                                WINDOW_GEOMETRY, HELP_TEXT)
 
 
 class NumpyTableModel(QAbstractTableModel):
@@ -94,7 +96,7 @@ class NumpyTableModel(QAbstractTableModel):
         """
         return self._data.shape[1]
 
-    def data(self, index: QModelIndex, role=Qt.DisplayRole):
+    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole):
         """
         Returns the data for a given cell, formatted as a string and rounded if needed.
 
@@ -112,7 +114,7 @@ class NumpyTableModel(QAbstractTableModel):
         if not index.isValid():
             return None
 
-        if role == Qt.DisplayRole or role == Qt.EditRole:
+        if role == Qt.ItemDataRole.DisplayRole or role == Qt.ItemDataRole.EditRole:
             value = self._data[index.row(), index.column()]
             # display only the rounded data
             if isinstance(value, (float, np.float64, np.float32)):
@@ -121,7 +123,7 @@ class NumpyTableModel(QAbstractTableModel):
                 return str(value)
         return None
 
-    def headerData(self, section: int, orientation, role=Qt.DisplayRole):
+    def headerData(self, section: int, orientation, role=Qt.ItemDataRole.DisplayRole):
         """
         Returns the header data for a given row or column section.
 
@@ -134,10 +136,10 @@ class NumpyTableModel(QAbstractTableModel):
             str | None: The header value or None if invalid.
         """
         # only the row indices are useful here, so the column names are
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Vertical and section < len(self._rownames):
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Vertical and section < len(self._rownames):
                 return self._rownames[section]  # Vertical header as row numbers
-            if orientation == Qt.Horizontal and section < len(self._columnnames):
+            if orientation == Qt.Orientation.Horizontal and section < len(self._columnnames):
                 return self._columnnames[section]
         return None
     
@@ -253,8 +255,8 @@ class ArrayTableViewer(QMainWindow):
         Initialize the table view widget.
         """
         self.table_widget = QTableView()
-        self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table_widget.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table_widget.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table_widget.installEventFilter(self)
         self.update_bin_attr()
         self.update_table()
@@ -263,7 +265,7 @@ class ArrayTableViewer(QMainWindow):
         """
         Initialize the scroll bar.
         """        
-        self.scroll_bar = QScrollBar(Qt.Vertical)
+        self.scroll_bar = QScrollBar(Qt.Orientation.Vertical)
         self.scroll_bar.setMinimum(0)
         self.scroll_bar.setMaximum(self.n_bins-1)
         self.scroll_bar.setSingleStep(1)
@@ -333,7 +335,7 @@ class ArrayTableViewer(QMainWindow):
         to the scroll bar. Enables the use of the scroll bar without the need to hover over
         it.
         """
-        if watched == self.table_widget and event.type() in [QEvent.Wheel, QEvent.KeyPress]:
+        if watched == self.table_widget and event.type() in [QEvent.Type.Wheel, QEvent.Type.KeyPress]:
             self.scroll_bar.event(event)
             return True
         return super().eventFilter(watched, event)  # Call base class method for other events
