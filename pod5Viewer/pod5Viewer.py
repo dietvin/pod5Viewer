@@ -96,6 +96,7 @@ class Pod5Viewer(QMainWindow):
         self.setWindowIcon(self.icon)
 
         self.init_menu()
+        self.init_id_input_window()
         self.init_info_dialog()
         self.init_file_navigator()
         self.init_data_tab_viewer()
@@ -154,7 +155,6 @@ class Pod5Viewer(QMainWindow):
         """
         Initialize the window ID input for filtering.
         """
-        self.init_id_input_window()
         self.id_input_window = IDInputWindow()
         self.id_input_window.submitted.connect(self.update_reads_of_interest)
 
