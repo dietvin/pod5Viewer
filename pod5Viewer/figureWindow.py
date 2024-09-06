@@ -378,8 +378,8 @@ class FigureWindow(QMainWindow):
                                     # Stored to track the current zoom when redrawing the figure after toggling a legend item 
     current_end_ratio: float | None 
 
-    fig: mpl.figure.Figure
-    ax: mpl.axes._axes.Axes
+    fig: plt.figure.Figure
+    ax: plt.axes.Axes
 
     canvas: FigureCanvas
     overview_widget: OverviewWidget
