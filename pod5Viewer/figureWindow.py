@@ -1,7 +1,11 @@
 import numpy as np
-from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QPushButton, QScrollArea, QSizePolicy, QLabel, QLineEdit, QMessageBox, QCheckBox, QFileDialog
+from PySide6.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout, 
+                               QGridLayout, QWidget, QPushButton, QScrollArea, 
+                               QSizePolicy, QLabel, QLineEdit, QMessageBox, 
+                               QCheckBox, QFileDialog)
 from PySide6.QtCore import Qt, Signal, QPoint, QRect
-from PySide6.QtGui import QCursor, QPainter, QPen, QMouseEvent, QColor, QPixmap, QKeySequence, QShortcut
+from PySide6.QtGui import (QCursor, QPainter, QPen, QMouseEvent, QColor, 
+                           QPixmap, QKeySequence, QShortcut)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -9,7 +13,11 @@ from typing import Dict, Tuple
 import itertools, math, copy
 from datetime import datetime
 
-from constants.figureWindow_constants import *
+try:
+    from pod5Viewer.constants.figureWindow_constants import *
+except ModuleNotFoundError:
+    from constants.figureWindow_constants import *
+
 
 class OverviewWidget(QWidget):
     """

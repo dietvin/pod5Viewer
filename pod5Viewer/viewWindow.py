@@ -8,6 +8,12 @@ from PySide6.QtGui import QShortcut, QKeySequence
 from typing import List
 import math
 
+try:
+    from pod5Viewer.constants.viewWindow_constants import *
+except ModuleNotFoundError:
+    from constants.viewWindow_constants import *
+
+
 class NumpyTableModel(QAbstractTableModel):
     """
     A table model for displaying NumPy arrays in a Qt view.

@@ -1,5 +1,8 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView, QHBoxLayout, QWidget, QTreeWidgetItem, QFileDialog, QMessageBox, QTabWidget
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QKeySequence, QShortcut, QIcon
+from PySide6.QtWidgets import (QApplication, QMainWindow, QTreeView, 
+                               QHBoxLayout, QWidget, QTreeWidgetItem, 
+                               QFileDialog, QMessageBox, QTabWidget)
+from PySide6.QtGui import (QStandardItemModel, QStandardItem, QKeySequence, 
+                           QShortcut, QIcon)
 from PySide6.QtCore import Qt
 import sys, os, pathlib, yaml, traceback, platform
 from typing import Dict, List, Any, Tuple

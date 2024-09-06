@@ -1,10 +1,14 @@
-from PySide6.QtWidgets import (
-    QMainWindow, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, 
-    QFileDialog, QMessageBox, QLabel, QWidget
-)
+from PySide6.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout, 
+                               QTextEdit, QPushButton, QFileDialog, 
+                               QMessageBox, QLabel, QWidget)
 from PySide6.QtCore import Signal
 from typing import List
-from constants.idInputWindow_constants import *
+
+try:
+    from pod5Viewer.constants.idInputWindow_constants import *
+except ModuleNotFoundError:
+    from constants.idInputWindow_constants import *
+
 
 class IDInputWindow(QMainWindow):
     """

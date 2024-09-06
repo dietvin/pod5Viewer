@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTreeWidget, QTreeWidgetItem, QLineEdit, QPushButton, QStyle
+from PySide6.QtWidgets import (QHBoxLayout, QVBoxLayout, QWidget, QTreeWidget, 
+                               QTreeWidgetItem, QLineEdit, QPushButton, QStyle)
 from PySide6.QtCore import Qt, Signal
 from typing import List, Dict
 
