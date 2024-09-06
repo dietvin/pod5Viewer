@@ -9,25 +9,100 @@ from typing import List
 import math
 
 class NumpyTableModel(QAbstractTableModel):
+    """
+    A table model for displaying NumPy arrays in a Qt view.
+
+    The `NumpyTableModel` class acts as a bridge between NumPy arrays and Qt's table view.
+    It allows NumPy data to be displayed efficiently in a tabular format, with support
+    for row and column headers. The model also supports rounding of displayed numerical
+    data.
+
+    Attributes:
+        _data (np.ndarray): The NumPy array containing the table data.
+        _rownames (List[int]): The list of row indices used as row headers.
+        _columnnames (List[int]): The list of column indices used as column headers.
+
+    Methods:
+        __init__(data, rownames, columnnames, parent): Initializes the model with NumPy data and optional headers.
+        __get_header(names, data_shape): Helper method to generate default headers or use provided ones.
+        rowCount(parent): Returns the number of rows in the model (corresponding to the data's shape).
+        columnCount(parent): Returns the number of columns in the model (corresponding to the data's shape).
+        data(index, role): Returns the data to be displayed at a given index, rounded to a specified number of decimals.
+        headerData(section, orientation, role): Returns the appropriate header for the given section (row or column).
+    """
     def __init__(self, data: np.ndarray, rownames: List[int]|None = None, columnnames: List[int]|None = None, parent=None):
+        """
+        Initializes the NumpyTableModel with data and optional row and column headers.
+
+        Args:
+            data (np.ndarray): The data to display, stored as a NumPy array.
+            rownames (List[int], optional): A list of integers for the row headers. Defaults to None.
+            columnnames (List[int], optional): A list of integers for the column headers. Defaults to None.
+            parent: The parent object, if any. Defaults to None.
+        """
         super().__init__()
         self._data = data
         self._rownames = self.__get_header(rownames, self.rowCount())
         self._columnnames = self.__get_header(columnnames, self.rowCount())
 
     def __get_header(self, names: List[int]|None, data_shape: int):
+        """
+        Generates default headers or uses provided ones for rows/columns.
+
+        If a list of header names is provided and its length matches the data shape, it is used.
+        Otherwise, it defaults to using a range based on the number of rows/columns.
+
+        Args:
+            names (List[int] | None): A list of header names or None for default.
+            data_shape (int): The length of the header (number of rows or columns).
+
+        Returns:
+            List[int]: The list of header names (either provided or default).
+        """
         if names:
             if len(names) == data_shape:
                 return names
         return [i for i in range(data_shape)]
 
     def rowCount(self, parent: QModelIndex | QPersistentModelIndex | None = None):
+        """
+        Returns the number of rows in the data.
+
+        Args:
+            parent (QModelIndex, optional): The parent index. Defaults to None.
+
+        Returns:
+            int: The number of rows in the data (first dimension of the array).
+        """
         return self._data.shape[0]
 
     def columnCount(self, parent: QModelIndex | QPersistentModelIndex | None = None):
+        """
+        Returns the number of columns in the data.
+
+        Args:
+            parent (QModelIndex, optional): The parent index. Defaults to None.
+
+        Returns:
+            int: The number of columns in the data (second dimension of the array).
+        """
         return self._data.shape[1]
 
     def data(self, index: QModelIndex, role=Qt.DisplayRole):
+        """
+        Returns the data for a given cell, formatted as a string and rounded if needed.
+
+        If the data is a float, it is rounded to a specified number of decimal places
+        (defined by the global `NUM_DECIMALS`). For other types, the data is simply converted
+        to a string.
+
+        Args:
+            index (QModelIndex): The index of the cell.
+            role (int, optional): The role to determine how data should be displayed. Defaults to Qt.DisplayRole.
+
+        Returns:
+            str | None: The data as a string, rounded if necessary, or None if invalid.
+        """
         if not index.isValid():
             return None
 
@@ -41,6 +116,17 @@ class NumpyTableModel(QAbstractTableModel):
         return None
 
     def headerData(self, section: int, orientation, role=Qt.DisplayRole):
+        """
+        Returns the header data for a given row or column section.
+
+        Args:
+            section (int): The section (row/column number) for which to return the header.
+            orientation (Qt.Orientation): The orientation (vertical for rows, horizontal for columns).
+            role (int, optional): The role for header display. Defaults to Qt.DisplayRole.
+
+        Returns:
+            str | None: The header value or None if invalid.
+        """
         # only the row indices are useful here, so the column names are
         if role == Qt.DisplayRole:
             if orientation == Qt.Vertical and section < len(self._rownames):
@@ -51,6 +137,42 @@ class NumpyTableModel(QAbstractTableModel):
     
 
 class ArrayTableViewer(QMainWindow):
+    """
+    A window for viewing large 1D NumPy arrays in a paginated table view.
+
+    The `ArrayTableViewer` displays a large dataset (signal) stored in a 1D NumPy array.
+    The data is divided into scrollable bins, with each bin displayed as a 2D table of
+    customizable size. The class handles resizing events, automatically adjusting the table
+    size and binning accordingly. The table supports vertical scrolling to navigate through
+    the data and provides export functionality for saving the data as either a `.npy` or `.txt` file.
+
+    Attributes:
+        read_id (str): Identifier for the data (e.g., a read ID).
+        in_pa (bool): Whether the signal is measured in picoamperes.
+        full_data (np.ndarray): The full 1D signal data to be visualized.
+        full_data_len (int): Length of the full data array.
+        num_rows (int): Number of rows currently visible in the table.
+        num_cols (int): Number of columns currently visible in the table.
+        bin_size (int): The number of elements in each bin.
+        n_bins (int): Total number of bins in which the data is split.
+
+    Methods:
+        init_shortcuts(): Initializes keyboard shortcuts (e.g., closing window with CTRL+Q).
+        init_menu(): Initializes the menu bar with export and help options.
+        initUI(): Sets up the user interface (table, scroll bar, layouts).
+        init_table(): Sets up the QTableView for displaying the data.
+        init_scrollbar(): Configures the vertical scroll bar for navigating the data.
+        init_layout(): Arranges the UI elements in a layout.
+        update_table(bin_idx): Updates the table view to show the bin of data at the specified index.
+        update_bin_attr(): Recalculates the number of rows, columns, and bins based on the window size.
+        eventFilter(watched, event): Redirects mouse wheel and keypress events from the table to the scroll bar.
+        resizeEvent(event): Handles window resizing, recalculating table size and updating the view.
+        update_scrollbar(): Updates the scroll bar to reflect the current number of bins.
+        export(to_npy): Exports the data to a file (either `.npy` or `.txt`).
+        export_npy(path): Saves the data in NumPy format.
+        export_text(path): Saves the data as a text file.
+        show_help(): Displays a help dialog with information about shortcuts.
+    """
     read_id: str
     in_pa: bool
     full_data: np.ndarray
