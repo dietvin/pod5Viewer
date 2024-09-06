@@ -2,14 +2,15 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QTreeView,
                                QHBoxLayout, QWidget, QTreeWidgetItem, 
                                QFileDialog, QMessageBox, QTabWidget)
 from PySide6.QtGui import (QStandardItemModel, QStandardItem, QKeySequence, 
-                           QShortcut, QIcon)
+                           QShortcut, QIcon, QCloseEvent)
 from PySide6.QtCore import Qt
-import sys, os, pathlib, yaml, traceback, platform
+import sys, os, pathlib, yaml, platform
 from typing import Dict, List, Any, Tuple
 import numpy as np
 
 try:
-    from pod5Viewer.constants.pod5Viewer_constants import HELP_STRINGS
+    from pod5Viewer.constants.pod5Viewer_constants import (HELP_STRINGS, WINDOW_TITLE,
+                                                           WINDOW_GEOMETRY, SHORTCUT_HELP_TEXT)
     from pod5Viewer.__version__ import __version__
     from pod5Viewer.dataHandler import DataHandler
     from pod5Viewer.viewWindow import ArrayTableViewer
@@ -17,7 +18,8 @@ try:
     from pod5Viewer.figureWindow import FigureWindow
     from pod5Viewer.idInputWindow import IDInputWindow
 except ModuleNotFoundError:
-    from constants.pod5Viewer_constants import HELP_STRINGS
+    from constants.pod5Viewer_constants import (HELP_STRINGS, WINDOW_TITLE,
+                                                WINDOW_GEOMETRY, SHORTCUT_HELP_TEXT)
     from __version__ import __version__
     from dataHandler import DataHandler
     from viewWindow import ArrayTableViewer
@@ -38,61 +40,71 @@ class Pod5Viewer(QMainWindow):
     A Qt-based GUI application for viewing and navigating POD5 files.
 
     Attributes:
-        file_navigator (QTreeWidget): Widget for displaying and selecting files and read IDs.
-        data_viewer (QTreeView): Widget for displaying detailed data of the selected read.
-        data_handler (DataHandler): Handles data operations for the loaded POD5 files.
-
-    Methods:
-        init_ui():
-            Initializes the user interface.
-
-        select_files():
-            Opens a file dialog to select POD5 files.
-
-        select_directory():
-            Opens a directory dialog to select a directory containing POD5 files.
-
-        load_files(file_paths: List[str]):
-            Loads POD5 files and populates the file navigator.
-
-        fill_data_viewer(read_id: QTreeWidgetItem):
-            Populates the data viewer with detailed data for the selected read ID.
-
-        populate_data_viewer(parent: QStandardItem, data: Dict[str, Any]):
-            Recursively populates the data viewer with hierarchical data.
+        file_navigator (FileNavigator): Custom Widget that displays the hierarchy of loaded POD5 files and their
+            read IDs. Allows the user to select specific reads for viewing and analysis.Crucial for navigating 
+            through the loaded data files.
+        data_tab_viewer (QTabWidget): This widget manages and displays tabs, where each tab represents an opened 
+            read. It allows users to view multiple reads simultaneously and switch between them. Central to the 
+            user interface for data visualization.
+        data_handler (DataHandler): This object manages the loading and processing of POD5 files. It provides 
+            methods to access read data and metadata. Essential for all data operations in the application.
+        opened_read_data (Dict[str, np.ndarray]): This dictionary stores the data of all currently opened reads.
+            The keys are read IDs, and the values are the corresponding read data. Important for quick access 
+            to read data without reloading from files.
+        preview_tab (QTreeView | None): This represents the current preview tab in the data_tab_viewer. It shows 
+            a quick view of a selected read without fully opening it. Enhances user experience by providing quick
+            data previews.
+        plot_window (FigureWindow | None): This keeps track of the currently opened plot window. It's used for 
+            displaying graphical representations of read data. Critical for data visualization functionality.
+            None until the window is first called.
+        reads_of_interest (List[str] | None): List of read IDs given for filtering loaded data. If loaded, only
+            reads with fitting IDs get shown in the file navigator. None if no filtering is active. 
     """
+    file_navigator: FileNavigator
+    data_tab_viewer: QTabWidget
+    data_handler: DataHandler
+    opened_read_data: Dict[str, Any]
+    preview_tab: QTreeView | None
+    plot_window: FigureWindow | None
     reads_of_interest: List[str] | None
 
     def __init__(self, file_paths: List[str]|None = None) -> None:
         """
-        Initializes the Pod5Viewer application.
-
+        Initializes the Pod5Viewer application. Initializes UI, attributes, shortcuts, 
+        and loads files if provided.
+        
         Args:
             file_paths (List[str] | None): Optional list of file paths to be loaded at startup.
-                If provided, the files will be loaded automatically.
-
-        Returns:
-            None
         """
         super().__init__()
         self.init_ui()
+        self.init_attrs()
         self.init_shortcuts()
-        self.opened_read_data = {}
 
         if file_paths:
             self.load_files(file_paths)
 
-
     def init_ui(self) -> None:
         """
         Initializes the user interface elements of the Pod5Viewer.
-        Sets up the window title, menu, layout, and widgets.
+        Sets up the window title, menu bar, layout, and widgets.
+        Creates file navigator, data tab viewer, and other UI components.
         """
-        self.setWindowTitle("pod5Viewer")
-        self.setGeometry(100, 100, 1200, 800)
+        self.setWindowTitle(WINDOW_TITLE)
+        self.setGeometry(*WINDOW_GEOMETRY)
         self.icon = QIcon(self.__resource_path("icon.ico"))
         self.setWindowIcon(self.icon)
 
+        self.init_menu()
+        self.init_info_dialog()
+        self.init_file_navigator()
+        self.init_data_tab_viewer()
+        self.init_layout()
+
+    def init_menu(self) -> None:
+        """
+        Initializes the menu and connects actions to corresponding methods.
+        """
         # set up the dropdown menu in the top
         menubar = self.menuBar()
 
@@ -138,60 +150,68 @@ class Pod5Viewer(QMainWindow):
         help_menu.addSeparator()
         help_menu.addAction("About", self.show_about)
 
+    def init_id_input_window(self) -> None:
+        """
+        Initialize the window ID input for filtering.
+        """
+        self.init_id_input_window()
         self.id_input_window = IDInputWindow()
         self.id_input_window.submitted.connect(self.update_reads_of_interest)
-        self.reads_of_interest = None
 
+    def init_info_dialog(self) -> None:
+        """
+        Initializes the help dialog (for general help & shortcuts). 
+        """
         self.info_dialog = QMessageBox()
         self.info_dialog.setWindowIcon(self.icon)
 
-        # create the layout
-        layout = QHBoxLayout()
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
-
-        # left column to choose file and id
+    def init_file_navigator(self) -> None:
+        """
+        Initializes the file navigator and connects functionalities.
+        """
         self.file_navigator = FileNavigator()
         self.file_navigator.itemSelectionChanged.connect(self.on_tree_selection_changed)
         self.file_navigator.itemDoubleClicked.connect(self.add_proper_tab)
         self.file_navigator.itemActivated.connect(self.add_proper_tab)
 
-        # right side shows tabs containing the data for each opened read
+    def init_data_tab_viewer(self) -> None:
+        """
+        Initializes the data tab view widget. 
+        """
         self.data_tab_viewer = QTabWidget()
         self.data_tab_viewer.setTabsClosable(True)
         self.data_tab_viewer.tabCloseRequested.connect(self.remove_tab)
 
-        self.preview_tab = None
-
-        # keeps track of the currently opened plot window
-        self.data_view_window = None
-        self.plot_window = None
+    def init_layout(self) -> None:
+        """
+        Initializes the main layout and fills it with the file navigator and data tab
+        viewer widgets.
+        """ 
+        layout = QHBoxLayout()
+        container = QWidget()
+        container.setLayout(layout)
 
         layout.addWidget(self.file_navigator, 1)
         layout.addWidget(self.data_tab_viewer, 2)
 
+        self.setCentralWidget(container)
 
-    def closeEvent(self, event) -> None:
+    def init_attrs(self) -> None:
         """
-        Overrides the closeEvent method of the QMainWindow class.
-        Closes other windows before closing the main window.
-
-        Args:
-            event (QCloseEvent): The close event triggered by the user.
-
-        Returns:
-            None
+        Initializes attributes. Directly after initialization:
+        - no filtering
+        - no preview tab
+        - no data view window opened
+        - no plot window opened
+        - no reads opened (empty Dict)
         """
-        if self.data_view_window:
-            self.data_view_window.close()
-        if self.plot_window:
-            self.plot_window.close()    
-        # Call the base class implementation
-        super().closeEvent(event)
+        self.reads_of_interest = None
+        self.preview_tab = None
+        self.data_view_window = None
+        self.plot_window = None
+        self.opened_read_data = {}
 
-
-    def __resource_path(self, relative_path) -> str:
+    def __resource_path(self, relative_path: str) -> str:
         """
         Get the absolute path to a resource, works for dev and for PyInstaller
         """
@@ -245,7 +265,6 @@ class Pod5Viewer(QMainWindow):
         close_tab_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
         close_tab_shortcut.activated.connect(self.__shortcut_close_tab)
 
-
     def __shortcut_switch_focus(self) -> None:
         """
         Switches the focus between the file navigator and the data viewer.
@@ -258,13 +277,38 @@ class Pod5Viewer(QMainWindow):
 
 
     def __shortcut_cycle_reads(self) -> None:
+        """
+        Increases the current index. If the last index is reached, cycle back to index 0. 
+        Used when cycling via shortcut.
+        """
         if self.data_tab_viewer.count() > 0:
             self.data_tab_viewer.setCurrentIndex((self.data_tab_viewer.currentIndex() + 1) % self.data_tab_viewer.count())
     
 
     def __shortcut_close_tab(self) -> None:
+        """
+        Closes the current tab when executed via shortcut.
+        """
         if self.data_tab_viewer.count() > 0:
             self.remove_tab(self.data_tab_viewer.currentIndex())
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        """
+        Overrides the closeEvent method of the QMainWindow class.
+        Closes other windows before closing the main window.
+
+        Args:
+            event (QCloseEvent): The close event triggered by the user.
+
+        Returns:
+            None
+        """
+        if self.data_view_window:
+            self.data_view_window.close()
+        if self.plot_window:
+            self.plot_window.close()    
+        # Call the base class implementation
+        super().closeEvent(event)
 
 
     def show_about(self):
@@ -286,34 +330,7 @@ class Pod5Viewer(QMainWindow):
         """
         Displays a message box with information about the available shortcuts.
         """
-        shortcuts_text = f"""<center>
-                                <b>Shortcuts</b>
-                            </center>
-                            <b>File</b>
-                                <br>Ctrl+O: Open file(s)
-                                <br>Ctrl+D: Open directory
-                                <br>Ctrl+S: Export current read
-                                <br>Ctrl+A: Export all opened reads
-                                <br>Ctrl+Backspace: Clear viewer
-                                <br>Ctrl+Q: Exit application
-                                <br>
-                            <br><b>Navigation</b>
-                                <br>Tab: Switch between file navigator and data viewer
-                                <br>Ctrl+Tab: Cycle through tabs in the data viewer
-                                <br>Ctrl+W: Close the current tab in the data viewer
-                                <br>
-                            <br><b>Menu navigation</b>
-                                <br>Alt & F: Open the file menu
-                                <br>Alt & V: Open the view menu
-                                <br>Alt & H: Open the help menu
-                                <br>
-                            <br><b>View signal window</b>
-                                <br>Pagedown: Scroll down (large steps)
-                                <br>Pageup: Scroll up (large steps)
-                                <br>Arrow down: Scroll down
-                                <br>Arrow up: Scroll up
-                            """
-        self.info_dialog.setText(shortcuts_text)
+        self.info_dialog.setText(SHORTCUT_HELP_TEXT)
         self.info_dialog.setWindowTitle("Shortcuts")
         self.info_dialog.exec()
 
@@ -328,7 +345,6 @@ class Pod5Viewer(QMainWindow):
         if dialog.exec():
             pod5_files = dialog.selectedFiles()
             self.load_files(pod5_files)
-
 
     def select_directory(self):
         """
@@ -351,7 +367,8 @@ class Pod5Viewer(QMainWindow):
 
     def load_files(self, file_paths: List[str]) -> None:
         """
-        Loads the specified POD5 files and updates the file navigator with their read IDs.
+        Loads the specified POD5 files using the DataHandler.
+        Updates the file navigator with read IDs from loaded files.
 
         Args:
             file_paths (List[str]): A list of file paths to POD5 files to be loaded.
@@ -399,13 +416,11 @@ class Pod5Viewer(QMainWindow):
 
     def update_preview_tab(self, item: QTreeWidgetItem):
         """
-        Updates the preview tab with the data corresponding to the selected item.
-
+        Updates the preview tab with data corresponding to the selected item.
+        Creates or updates a tab in the data_tab_viewer for quick preview.
+        
         Args:
-            item (QTreeWidgetItem): The selected item in the tree widget.
-
-        Returns:
-            None
+            item (QTreeWidgetItem): The selected item in the tree widget.        
         """
         if item.childCount() == 0:
             read_id = item.text(0)
@@ -422,32 +437,28 @@ class Pod5Viewer(QMainWindow):
 
     def add_proper_tab(self, item):
         """
-        Adds a proper tab to the data tab viewer.
+        Adds a full data tab to the data tab viewer for the selected item.
+        If a tab for the item already exists, it's selected instead of creating a new one.
 
-        Parameters:
-        - item: The item to be added as a tab.
-
-        Returns:
-        None
-
-        Description:
-        - If the item has no child items, it is added as a proper tab to the data tab viewer.
-        - If a tab with the same item_id already exists, it is selected instead of adding a new tab.
-        - After adding a proper tab, the next selection should be a preview tab.
-        - The opened read data is stored in the opened_read_data dictionary.
+        Args:
+            item: The item to be added as a tab.
         """
+        # If the item has no child items, it is added as a proper tab to the data tab viewer.
         if item.childCount() == 0:
             read_id = item.text(0)
 
             if self.preview_tab:
                 self.data_tab_viewer.removeTab(self.data_tab_viewer.indexOf(self.preview_tab))
+                # After adding a proper tab, the next selection should be a preview tab.
                 self.preview_tab = None
 
             for i in range(self.data_tab_viewer.count()):
+                # If a tab with the same item_id already exists, it is selected instead of adding a new tab.
                 if self.data_tab_viewer.tabText(i) == read_id:
                     self.data_tab_viewer.setCurrentIndex(i)
                     return
 
+            # The opened read data is stored in the opened_read_data dictionary.
             proper_tab, proper_tab_data = self.prepare_tab_data(read_id)
             self.opened_read_data[read_id] = proper_tab_data
 
@@ -458,18 +469,13 @@ class Pod5Viewer(QMainWindow):
     def prepare_tab_data(self, read_id: str) -> Tuple[QTreeView, Dict[str, Any]]:
         """
         Prepares the data for a tab in the pod5Viewer application.
+        Creates a QTreeView with the read data and sets up tooltips using HELP_STRINGS.
 
         Args:
             read_id (str): The ID of the read data.
 
-        Returns:
+        Returns: 
             Tuple[QTreeView, Dict[str, Any]]: A tuple containing the QTreeView widget and the loaded data.
-
-        Raises:
-            None
-
-        Example usage:
-            data_viewer, data_viewer_data = prepare_tab_data('read123')
         """
         data_viewer = QTreeView()
         model = QStandardItemModel()
@@ -484,7 +490,7 @@ class Pod5Viewer(QMainWindow):
         return data_viewer, data_viewer_data
 
 
-    def populate_tree_model(self, parent: QStandardItem, data: Dict[str, Any], parent_keys: List[str] = []):
+    def populate_tree_model(self, parent: QStandardItem, data: Dict[str, Any], parent_keys: List[str] = []) -> None:
         """
         Recursively populates the data viewer with hierarchical data.
 
@@ -547,16 +553,9 @@ class Pod5Viewer(QMainWindow):
             None
         """
         if self.data_tab_viewer.count() > 0:
-            # Prompt the user to select a directory
-            dialog = QFileDialog(self, "Export current read")
-            dialog.setFileMode(QFileDialog.Directory)
-            dialog.setOption(QFileDialog.ShowDirsOnly, True)
-
-            if dialog.exec():
-                read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
-                directory_path = dialog.selectedFiles()[0]
-
-                self.export_read(directory_path, read_id)
+            directory_path = self.open_export_dialog("Export current read")
+            read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
+            self.export_read(directory_path, read_id)
 
 
     def export_all_opened_reads(self) -> None:
@@ -571,28 +570,41 @@ class Pod5Viewer(QMainWindow):
             None
         """
         if self.data_tab_viewer.count() > 0:
-            # Prompt the user to select a directory
-            dialog = QFileDialog(self, "Export all opened reads")
-            dialog.setFileMode(QFileDialog.Directory)
-            dialog.setOption(QFileDialog.ShowDirsOnly, True)
-
-            if dialog.exec():
-                directory_path = dialog.selectedFiles()[0]
-                for i in range(self.data_tab_viewer.count()):
-                    read_id = self.data_tab_viewer.tabText(i)
-                    self.export_read(directory_path, read_id)
+            directory_path = self.open_export_dialog("Export current read")
+            for i in range(self.data_tab_viewer.count()):
+                read_id = self.data_tab_viewer.tabText(i)
+                self.export_read(directory_path, read_id)
         
+    def open_export_dialog(self, label: str) -> str:
+        """
+        Opens the dialog for selecting the directory in which data gets
+        exported. 
+
+        Args:
+            label (str): Label to show in Dialog
+
+        Returns:
+            str: The path that was selected in the dialog.
+        """
+        dialog = QFileDialog(self, label)
+        dialog.setFileMode(QFileDialog.Directory)
+        dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        if dialog.exec():
+            try:
+                selected_path = dialog.selectedFiles()[0]
+            except IndexError:
+                raise Exception("Export dialog: No path given.") 
+            else: 
+                return selected_path
+
 
     def export_read(self, directory: str, read_id: str) -> None:
         """
-        Export the data of a specific read to a YAML file.
-
+        Exports the data of a specific read to a YAML file.
         Args:
-            directory (str): The directory where the YAML file will be saved.
-            read_id (str): The ID of the read to export.
 
-        Returns:
-            None
+        directory: The directory where the YAML file will be saved.
+        read_id: The ID of the read to export.        
         """
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
@@ -650,14 +662,12 @@ class Pod5Viewer(QMainWindow):
 
     def plot_signal(self, in_pa: bool = False, single: bool = True) -> None:
         """
-        Plots the signal data for the selected read(s) and opens a new window to display the plot.
+        Plots the signal data for the selected read(s) in a new window.
+        Can plot either a single read or all opened reads.
 
         Args:
-            in_pa (bool, optional): Indicates whether the data is in pA (picoampere) units. Defaults to False.
-            single (bool, optional): Indicates whether to plot the signal for a single read or all opened reads. Defaults to True.
-
-        Returns:
-            None
+            in_pa (bool): If True, plots the signal in picoamperes. Default is False.
+            single (bool): If True, plots only the current read. If False, plots all opened reads. Default is True.        
         """
         if self.data_tab_viewer.count() > 0:
             if single:
@@ -687,36 +697,10 @@ class Pod5Viewer(QMainWindow):
         self.file_navigator.clear()
 
 
-def error_handler(exc_type, exc_value, exc_traceback) -> None:
-    """
-    Handle and display an error message dialog.
-
-    Parameters:
-    - exc_type (type): The type of the exception.
-    - exc_value (Exception): The exception instance.
-    - exc_traceback (traceback): The traceback object.
-
-    Returns:
-    None
-
-    This function displays an error message dialog with the details of the exception.
-    It takes the exception type, exception instance, and traceback as input parameters.
-    The error message dialog shows the error message and provides a detailed text with the traceback information.
-    """
-    error_message = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-    error_dialog = QMessageBox()
-    error_dialog.setWindowTitle("An error occurred.")
-    error_dialog.setText("An unexpected error occurred. For support, open an Issue on the pod5Viewer Github page with the error message.")
-    error_dialog.setDetailedText(error_message)
-    error_dialog.exec()
- 
-
-def main():
+def main() -> None:
     app = QApplication(sys.argv)
 
     file_paths = sys.argv[1:] if len(sys.argv) > 1 else None
-
-    sys.excepthook = error_handler
 
     window = Pod5Viewer(file_paths)
     window.show()
