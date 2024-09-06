@@ -610,8 +610,8 @@ class Pod5Viewer(QMainWindow):
 
         file_path = os.path.join(directory, f"{read_id}.yaml")
         transformed_data = self.transform_data(self.opened_read_data[read_id], shorten=False)
-        if read_id in self.opened_read_data.keys():
-            with open(file_path, 'w') as file:
+        with open(file_path, 'w') as file:
+            if read_id in self.opened_read_data.keys():
                 yaml.dump(transformed_data, file)
 
         QApplication.restoreOverrideCursor()
@@ -635,6 +635,8 @@ class Pod5Viewer(QMainWindow):
                     transformed_data[key] = ",".join(str(x) for x in value[:num_values]) + "..."
                 else:
                     transformed_data[key] = ",".join(str(x) for x in value)
+            elif key == "read_id":
+                transformed_data[key] = str(value)
             else:
                 transformed_data[key] = value
         return transformed_data
