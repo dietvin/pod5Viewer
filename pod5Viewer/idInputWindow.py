@@ -35,7 +35,7 @@ class IDInputWindow(QMainWindow):
         Sets up the widgets and layout, and connects the buttons to their respective functions.
         """
         self.setWindowTitle(WINDOW_TITLE)
-        self.setGeometry(300, 300, WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.setGeometry(*WINDOW_GEOMETRY)
         
         # Set up the central widget and main layout
         central_widget = QWidget()
