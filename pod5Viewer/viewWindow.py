@@ -117,7 +117,7 @@ class NumpyTableModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.DisplayRole or role == Qt.ItemDataRole.EditRole:
             value = self._data[index.row(), index.column()]
             # display only the rounded data
-            if isinstance(value, (float, np.float64, np.float32)):
+            if isinstance(value, (float, np.float64, np.float32)): # type: ignore issue seems to be because is numpy types
                 return f"{round(value, NUM_DECIMALS)}"
             else:
                 return str(value)
