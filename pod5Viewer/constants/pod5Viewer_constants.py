@@ -1,3 +1,33 @@
+WINDOW_TITLE = "pod5Viewer"
+WINDOW_GEOMETRY = (100, 100, 1200, 800) 
+SHORTCUT_HELP_TEXT = """<center>
+        <b>Shortcuts</b>
+    </center>
+    <b>File</b>
+        <br>Ctrl+O: Open file(s)
+        <br>Ctrl+D: Open directory
+        <br>Ctrl+S: Export current read
+        <br>Ctrl+A: Export all opened reads
+        <br>Ctrl+Backspace: Clear viewer
+        <br>Ctrl+Q: Exit application
+        <br>
+    <br><b>Navigation</b>
+        <br>Tab: Switch between file navigator and data viewer
+        <br>Ctrl+Tab: Cycle through tabs in the data viewer
+        <br>Ctrl+W: Close the current tab in the data viewer
+        <br>
+    <br><b>Menu navigation</b>
+        <br>Alt & F: Open the file menu
+        <br>Alt & V: Open the view menu
+        <br>Alt & H: Open the help menu
+        <br>
+    <br><b>View signal window</b>
+        <br>Pagedown: Scroll down (large steps)
+        <br>Pageup: Scroll up (large steps)
+        <br>Arrow down: Scroll down
+        <br>Arrow up: Scroll up
+    """
+
 HELP_STRINGS = {
     "byte_count": "Number of bytes used to store the reads data",
     "calibration": "Calibration data associated with the read",
