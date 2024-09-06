@@ -6,7 +6,7 @@ from typing import Dict, List, Any, Tuple
 import numpy as np
 
 try:
-    from pod5Viewer.help_strings import HELP
+    from pod5Viewer.constants.pod5Viewer_constants import HELP_STRINGS
     from pod5Viewer.__version__ import __version__
     from pod5Viewer.dataHandler import DataHandler
     from pod5Viewer.viewWindow import ArrayTableViewer
@@ -14,7 +14,7 @@ try:
     from pod5Viewer.figureWindow import FigureWindow
     from pod5Viewer.idInputWindow import IDInputWindow
 except ModuleNotFoundError:
-    from help_strings import HELP
+    from constants.pod5Viewer_constants import HELP_STRINGS
     from __version__ import __version__
     from dataHandler import DataHandler
     from viewWindow import ArrayTableViewer
@@ -491,7 +491,7 @@ class Pod5Viewer(QMainWindow):
             parent_keys (List[str]): The list of parent keys leading to the current data.
         """
         for key, value in data.items():
-            help_str = HELP.get(" ".join(parent_keys + [key]), None)
+            help_str = HELP_STRINGS.get(" ".join(parent_keys + [key]), None)
             if not help_str:
                 help_str = "No docstring available"
 

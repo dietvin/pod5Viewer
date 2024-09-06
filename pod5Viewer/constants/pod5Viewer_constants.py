@@ -1,4 +1,4 @@
-HELP = {
+HELP_STRINGS = {
     "byte_count": "Number of bytes used to store the reads data",
     "calibration": "Calibration data associated with the read",
     "calibration offset": "Calibration offset used to convert raw ADC data into pA readings",
