@@ -5,9 +5,11 @@ from PySide6.QtCore import Signal
 from typing import List
 
 try:
-    from pod5Viewer.constants.idInputWindow_constants import *
+    from pod5Viewer.constants.idInputWindow_constants import (WINDOW_TITLE, WINDOW_GEOMETRY, 
+                                                              INSTRUCTION_TEXT, LOAD_MSG_BOX_TEXT)
 except ModuleNotFoundError:
-    from constants.idInputWindow_constants import *
+    from constants.idInputWindow_constants import (WINDOW_TITLE, WINDOW_GEOMETRY, 
+                                                   INSTRUCTION_TEXT, LOAD_MSG_BOX_TEXT)
 
 
 class IDInputWindow(QMainWindow):
@@ -95,10 +97,10 @@ class IDInputWindow(QMainWindow):
                         self, 
                         "Overwrite Existing IDs?",
                         LOAD_MSG_BOX_TEXT,
-                        QMessageBox.Yes | QMessageBox.No,
-                        QMessageBox.No
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                        QMessageBox.StandardButton.No
                     )
-                    if result == QMessageBox.Yes:
+                    if result == QMessageBox.StandardButton.Yes:
                         self.id_input.setText(file_content)
                 else:
                     self.id_input.setText(file_content)
