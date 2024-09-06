@@ -242,7 +242,10 @@ class OverviewWidget(QWidget):
             event (QMouseEvent): The mouse move event.
         """
         x = event.pos().x()
-        idx = int(x / self.width() * self.x_lims[1])
+        # in case the user hovers the mouse over the widget border to the left
+        if x < 0: idx = 0
+        # in case the user hovers the mouse over the widget border to the right
+        idx = min(int(x / self.width() * self.x_lims[1]), len(self.x_vals)-1)
         coords = event.pos()
         coords.setY(coords.y()+25)
         self.hover_label.setText(f"{self.x_vals[idx]:.2f}")
