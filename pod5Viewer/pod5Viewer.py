@@ -556,6 +556,8 @@ class Pod5Viewer(QMainWindow):
             directory_path = self.open_export_dialog("Export current read")
             read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
             self.export_read(directory_path, read_id)
+        else:
+            self.show_no_data_opened_message()
 
 
     def export_all_opened_reads(self) -> None:
@@ -574,6 +576,8 @@ class Pod5Viewer(QMainWindow):
             for i in range(self.data_tab_viewer.count()):
                 read_id = self.data_tab_viewer.tabText(i)
                 self.export_read(directory_path, read_id)
+        else:
+            self.show_no_data_opened_message()
         
     def open_export_dialog(self, label: str) -> str:
         """
@@ -661,6 +665,8 @@ class Pod5Viewer(QMainWindow):
             self.data_view_window = ArrayTableViewer(data, read_id=read_id, in_pa=in_pa)
             self.data_view_window.setWindowIcon(self.icon)
             self.data_view_window.show()
+        else:
+            self.show_no_data_opened_message()
 
     def plot_signal(self, in_pa: bool = False, single: bool = True) -> None:
         """
@@ -687,6 +693,8 @@ class Pod5Viewer(QMainWindow):
             self.plot_window = FigureWindow(plot_data, in_pa=in_pa)
             self.plot_window.setWindowIcon(self.icon)
             self.plot_window.show()
+        else:
+            self.show_no_data_opened_message()
 
     def clear_viewer(self) -> None:
         """
@@ -697,6 +705,13 @@ class Pod5Viewer(QMainWindow):
         self.opened_read_data = {}
         self.plot_window = None
         self.file_navigator.clear()
+
+    def show_no_data_opened_message(self) -> None:
+        """
+        Shows a message if the user wants to analyze a read, but no read is opened.
+        """      
+        QMessageBox.warning(self, "No read opened", 
+            "A read must be opened to perform this action. Load and access at least one read.")
 
 
 def main() -> None:
