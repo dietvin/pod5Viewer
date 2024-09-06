@@ -132,16 +132,16 @@ class Pod5Viewer(QMainWindow):
 
         view_menu = menubar.addMenu("&View")
 
-        view_signal_menu = view_menu.addMenu("View signal...")
+        view_signal_menu = view_menu.addMenu("View signal")
         view_signal_menu.addAction("View full signal data...", lambda: self.show_full_signal(in_pa=False))
         view_signal_menu.addAction("View full signal pA data...", lambda: self.show_full_signal(in_pa=True))
         view_menu.addSeparator()
 
-        plot_signal_menu = view_menu.addMenu("Plot signal...")
+        plot_signal_menu = view_menu.addMenu("Plot signal")
         plot_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(single=True))
         plot_signal_menu.addAction("All open reads...", lambda: self.plot_signal(single=False))
 
-        plot_pa_signal_menu = view_menu.addMenu("Plot pA signal...")
+        plot_pa_signal_menu = view_menu.addMenu("Plot pA signal")
         plot_pa_signal_menu.addAction("Focussed read...", lambda: self.plot_signal(in_pa=True, single=True))
         plot_pa_signal_menu.addAction("All open reads...", lambda: self.plot_signal(in_pa=True, single=False))
 
