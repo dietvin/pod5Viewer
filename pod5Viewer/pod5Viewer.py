@@ -340,7 +340,7 @@ class Pod5Viewer(QMainWindow):
         Loads the selected files into the application.
         """
         dialog = QFileDialog(self, "Select Files")
-        dialog.setFileMode(QFileDialog.ExistingFiles)
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         dialog.setNameFilter("POD5 files (*.pod5)")
         if dialog.exec():
             pod5_files = dialog.selectedFiles()
@@ -352,8 +352,8 @@ class Pod5Viewer(QMainWindow):
         Loads the POD5 files from the selected directory into the application.
         """
         dialog = QFileDialog(self, "Select Directory")
-        dialog.setFileMode(QFileDialog.Directory)
-        dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        dialog.setFileMode(QFileDialog.FileMode.Directory)
+        dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
 
         if dialog.exec():
             pod5_dir = dialog.selectedFiles()[0]
@@ -587,8 +587,8 @@ class Pod5Viewer(QMainWindow):
             str: The path that was selected in the dialog.
         """
         dialog = QFileDialog(self, label)
-        dialog.setFileMode(QFileDialog.Directory)
-        dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        dialog.setFileMode(QFileDialog.FileMode.Directory)
+        dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
         if dialog.exec():
             try:
                 selected_path = dialog.selectedFiles()[0]
