@@ -270,11 +270,11 @@ class Pod5Viewer(QMainWindow):
         """
         Switches the focus between the file navigator and the data viewer.
         """
-        if self.file_navigator.hasFocus():
+        if self.file_navigator.file_navigator.hasFocus():
             if self.data_tab_viewer.currentWidget() is not None:
                 self.data_tab_viewer.currentWidget().setFocus()
         else:
-            self.file_navigator.setFocus()
+            self.file_navigator.file_navigator.setFocus()
 
 
     def __shortcut_cycle_reads(self) -> None:
