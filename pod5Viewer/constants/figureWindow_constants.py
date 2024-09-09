@@ -6,7 +6,7 @@ COLOR_CYCLE = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
 
 SUBSAMPLE_BIN_COUNT = 5000
 
-WINDOW_TITLE = "pod5Viewer - Figure Window"
+WINDOW_TITLE = "pod5Viewer - Plot signal"
 WINDOW_GEOMETRY = (100, 100, 800, 600)
 LEGEND_CHECKBOX_SIZE = (20, 20)
 

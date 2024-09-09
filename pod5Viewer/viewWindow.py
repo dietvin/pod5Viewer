@@ -242,7 +242,7 @@ class ArrayTableViewer(QMainWindow):
         Elements are placed in layouts. After initializing the table widget, the dimensions are calculated 
         and the first bin is shown.
         """
-        self.setWindowTitle(f"{'Signal [pA]' if self.in_pa else 'Signal'}")
+        self.setWindowTitle(f"pod5Viewer - View signal{' [pA]' if self.in_pa else ''}")
         self.setGeometry(*WINDOW_GEOMETRY)
         self.read_id_label = QLabel(f"Read ID: {self.read_id}")
 
