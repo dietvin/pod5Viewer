@@ -509,6 +509,8 @@ class FigureWindow(QMainWindow):
         main_widget.setLayout(self.main_layout)
         self.setCentralWidget(main_widget)
 
+        self.zoom_selection_x1_input.setFocus()
+
     def init_menubar(self) -> None:
         """
         Initialize the menu bar.
