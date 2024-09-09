@@ -5,7 +5,8 @@ from PySide6.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout,
                                QCheckBox, QFileDialog)
 from PySide6.QtCore import Qt, Signal, QPoint, QRect
 from PySide6.QtGui import (QCursor, QPainter, QPen, QMouseEvent, QColor, 
-                           QPixmap, QKeySequence, QShortcut)
+                           QPixmap, QKeySequence, QShortcut, QPaintEvent,
+                           QResizeEvent)
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -147,20 +148,51 @@ class OverviewWidget(QWidget):
         
         width = self.width()
         height = self.height()
+        
         for read_id, (time, signal, color) in self.data.items():
-            x_min, x_max = self.x_lims
-            y_min, y_max = self.y_lims
-            scale_x = width / (x_max - x_min)
-            scale_y = height / (y_max - y_min)
-
-            time_scaled = (time - x_min) * scale_x
+            time_scaled = self.scale_between(time, 0, width)
             # *-1 + height to account for flipped coordinate system in Qt
-            signal_scaled = -((signal - y_min) * scale_y) + height 
-
+            signal_scaled = -(self.scale_between(signal, 0, height)) + height
             data_scaled[read_id] = (time_scaled, signal_scaled, color)
+        
         self.data_scaled = data_scaled
 
-    def paintEvent(self, event) -> None:
+    def scale_between(self, data: np.ndarray, a: int, b: int) -> np.ndarray:
+        """
+        Scale a NumPy array to a range between a and b. This function applies 
+        min-max scaling to the input array and then scales and shifts the 
+        result to fit within the range [a, b]. If the input array has only 
+        one unique value, the function will return an array filled with the 
+        value (a + b) / 2.
+
+        Args:
+            data (numpy.ndarray): The input array to be scaled.
+            a (float): The minimum value of the scaled array.
+            b (float): The maximum value of the scaled array.
+
+        Returns:
+            numpy.ndarray: A new array with the same shape as the input, 
+                but with values scaled to the range [a, b].
+
+        Raises:
+            ValueError: If the input array is empty or if a == b.
+
+        """
+        if data.size == 0:
+            raise ValueError("Input array is empty")
+        if a == b:
+            raise ValueError("a and b must be different")
+
+        min_val = np.nanmin(data)
+        max_val = np.nanmax(data)
+
+        if min_val == max_val:
+            return np.full_like(data, (a + b) / 2)
+
+        scaled = a + (b - a) * (data - min_val) / (max_val - min_val)
+        return scaled
+    
+    def paintEvent(self, event: QPaintEvent) -> None:
         """
         Paints the widget, including the signals and the zoom selection rectangles.
 
@@ -213,7 +245,7 @@ class OverviewWidget(QWidget):
                     painter.setPen(QColor(color))
                     painter.drawLine(x1, y1, x2, y2)
 
-    def resizeEvent(self, event) -> None:
+    def resizeEvent(self, event: QResizeEvent) -> None:
         """
         Handles the resize event by scaling the data and updating the widget.
 
