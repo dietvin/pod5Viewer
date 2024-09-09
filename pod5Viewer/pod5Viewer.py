@@ -555,8 +555,9 @@ class Pod5Viewer(QMainWindow):
         """
         if self.data_tab_viewer.count() > 0:
             directory_path = self.open_export_dialog("Export current read")
-            read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
-            self.export_read(directory_path, read_id)
+            if directory_path:
+                read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
+                self.export_read(directory_path, read_id)
         else:
             self.show_no_data_opened_message()
 
@@ -574,9 +575,10 @@ class Pod5Viewer(QMainWindow):
         """
         if self.data_tab_viewer.count() > 0:
             directory_path = self.open_export_dialog("Export current read")
-            for i in range(self.data_tab_viewer.count()):
-                read_id = self.data_tab_viewer.tabText(i)
-                self.export_read(directory_path, read_id)
+            if directory_path:
+                for i in range(self.data_tab_viewer.count()):
+                    read_id = self.data_tab_viewer.tabText(i)
+                    self.export_read(directory_path, read_id)
         else:
             self.show_no_data_opened_message()
         
