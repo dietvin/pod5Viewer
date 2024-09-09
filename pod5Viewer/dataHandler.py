@@ -75,6 +75,8 @@ class DataHandler:
     def members_to_dict(self, obj) -> Dict[str, Any]:
         """
         Converts an object's attributes to a dictionary, handling various types of attributes.
+        Dictionary can be nested, as the method can be called recursively. In case an attribute
+        can not be loaded, fills the value with the error message for that attribute.
 
         Args:
             obj (Any): The object whose attributes need to be converted.
@@ -87,16 +89,19 @@ class DataHandler:
         members = [attr for attr in dir(obj) if not callable(getattr(obj, attr)) and not attr.startswith("_")]
 
         for member in members: 
-            member_value = getattr(obj, member)
-            if member == "signal_rows":
-                obj_dict[member] = self.process_signal_rows(member_value)
-            elif type(member_value) in [float, int, str, bool, dict, datetime.datetime, uuid.UUID, np.ndarray]:
-                obj_dict[member] = member_value
-            # implemented to fix recursion error on MacOS:
-            elif type(member_value) == EndReasonEnum: 
-                return {"name": member_value.name, "value": member_value.value}
-            else:
-                obj_dict[member] = self.members_to_dict(member_value)
+            try:
+                member_value = getattr(obj, member)
+                if member == "signal_rows":
+                    obj_dict[member] = self.process_signal_rows(member_value)
+                elif type(member_value) in [float, int, str, bool, dict, datetime.datetime, uuid.UUID, np.ndarray]:
+                    obj_dict[member] = member_value
+                # implemented to fix recursion error on MacOS:
+                elif type(member_value) == EndReasonEnum: 
+                    return {"name": member_value.name, "value": member_value.value}
+                else:
+                    obj_dict[member] = self.members_to_dict(member_value)
+            except Exception as e:
+                obj_dict[member] = f"ERROR: {e}"
 
         return obj_dict
 
