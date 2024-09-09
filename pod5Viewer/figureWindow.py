@@ -8,6 +8,7 @@ from PySide6.QtGui import (QCursor, QPainter, QPen, QMouseEvent, QColor,
                            QPixmap, QKeySequence, QShortcut, QPaintEvent,
                            QResizeEvent)
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib.backends.backend_svg # import only needed so pyinstaller adds the module (needed for SVG export)
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from typing import Dict, Tuple
