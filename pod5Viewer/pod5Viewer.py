@@ -156,6 +156,7 @@ class Pod5Viewer(QMainWindow):
         Initialize the window ID input for filtering.
         """
         self.id_input_window = IDInputWindow()
+        self.id_input_window.setWindowIcon(self.icon)
         self.id_input_window.submitted.connect(self.update_reads_of_interest)
 
     def init_info_dialog(self) -> None:
