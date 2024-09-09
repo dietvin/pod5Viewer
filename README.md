@@ -29,7 +29,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
 
 For Windows systems the pod5Viewer can be installed conveniently via the installer. The installer can be downloaded here:
 
-[pod5Viewer-1.0.3-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.0.3/pod5Viewer-1.0.3-Setup.exe "Download pod5Viewer Windows installer") 
+[pod5Viewer-1.1.0-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5Viewer-1.1.0-Setup.exe "Download pod5Viewer Windows installer") 
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
@@ -39,10 +39,10 @@ After downloading the installer and following the steps provided, the pod5Viewer
 
 DEB files are available for Ubuntu 22.04 & 24.04 and Linux Mint 20.3 & 21.3 at the following links:
 
-- [Ubuntu 22.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.3/pod5viewer_1.0.3_ubuntu22.04.deb "Download pod5Viewer for Ubuntu 22.04")
-- [Ubuntu 24.04](https://github.com/dietvin/pod5Viewer/releases/download/1.0.3/pod5viewer_1.0.3_ubuntu24.04.deb "Download pod5Viewer for Ubuntu 24.04")
-- [Linux Mint 21.3](https://github.com/dietvin/pod5Viewer/releases/download/1.0.3/pod5viewer_1.0.3_linuxmint21.3.deb "Download pod5Viewer for Linux Mint 21.3")
-- [Linux Mint 20.3](https://github.com/dietvin/pod5Viewer/releases/download/1.0.3/pod5viewer_1.0.3_linuxmint20.3.deb "Download pod5Viewer for Linux Mint 20.3")
+- [Ubuntu 22.04](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5viewer_1.1.0_ubuntu22.04.deb "Download pod5Viewer for Ubuntu 22.04")
+- [Ubuntu 24.04](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5viewer_1.1.0_ubuntu24.04.deb "Download pod5Viewer for Ubuntu 24.04")
+- [Linux Mint 21.3](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5viewer_1.1.0_linuxmint21.3.deb "Download pod5Viewer for Linux Mint 21.3")
+- [Linux Mint 20.3](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5viewer_1.1.0_linuxmint20.3.deb "Download pod5Viewer for Linux Mint 20.3")
 
 After downloading use apt to install it on the system:
 
