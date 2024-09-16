@@ -19,8 +19,6 @@ The pod5Viewer is a Python application that provides a graphical user interface 
   - [Plotting signals](#plotting-signals)
   - [Exporting reads](#exporting-reads)
   - [Shortcuts](#shortcuts)
-- [Limitations](#limitations)
-  - [Plotting large amounts of data](#plotting-large-amounts-of-data)
 - [License](#license)
 
 ## Installation and requirements
