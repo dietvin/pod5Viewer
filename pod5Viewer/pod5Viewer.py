@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QTreeView,
 from PySide6.QtGui import (QStandardItemModel, QStandardItem, QKeySequence, 
                            QShortcut, QIcon, QCloseEvent)
 from PySide6.QtCore import Qt
-import sys, os, pathlib, yaml, platform
+import sys, os, pathlib, json, platform
 from typing import Dict, List, Any, Tuple
 import numpy as np
 
@@ -121,9 +121,21 @@ class Pod5Viewer(QMainWindow):
         main_menu.addAction("Filter reads...", self.open_id_input_window)
         main_menu.addSeparator()
 
-        export_menu = main_menu.addMenu("Export")
-        export_menu.addAction("Export current read...", self.export_current_read)
-        export_menu.addAction("Export all opened reads...", self.export_all_opened_reads)
+        export_all_menu = main_menu.addMenu("Export all")
+        export_all_menu.addAction("Current read...", self.export_focussed_read)
+        export_all_menu.addAction("All opened reads...", self.export_opened_reads)
+        
+        export_signal_menu = main_menu.addMenu("Export signal")
+        export_signal_nonpa_menu = export_signal_menu.addMenu("Signal")
+        export_signal_nonpa_menu.addAction("Current read (.npy/.txt)...", lambda: self.export_focussed_signal(in_pa=False))
+        export_signal_nonpa_menu.addAction("All opened reads (.npy)...", lambda: self.export_opened_signals(in_pa=False, suffix=".npy"))
+        export_signal_nonpa_menu.addAction("All opened reads (.txt)...", lambda: self.export_opened_signals(in_pa=False, suffix=".txt"))
+
+        export_signal_pa_menu = export_signal_menu.addMenu("pA signal")
+        export_signal_pa_menu.addAction("Current read (.npy/.txt)...", lambda: self.export_focussed_signal(in_pa=True))
+        export_signal_pa_menu.addAction("All opened reads (.npy)...", lambda: self.export_opened_signals(in_pa=True, suffix=".npy"))
+        export_signal_pa_menu.addAction("All opened reads (.txt)...", lambda: self.export_opened_signals(in_pa=True, suffix=".txt"))
+
         main_menu.addSeparator()
 
         main_menu.addAction("Clear", self.clear_viewer)
@@ -246,10 +258,10 @@ class Pod5Viewer(QMainWindow):
         open_directory_shortcut.activated.connect(self.select_directory)
         # Ctrl+S: Export current read
         export_current_read_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
-        export_current_read_shortcut.activated.connect(self.export_current_read)
+        export_current_read_shortcut.activated.connect(self.export_focussed_read)
         # Ctrl+A: Export all opened reads
         export_all_opened_reads_shortcut = QShortcut(QKeySequence("Ctrl+A"), self)
-        export_all_opened_reads_shortcut.activated.connect(self.export_all_opened_reads)
+        export_all_opened_reads_shortcut.activated.connect(self.export_opened_reads)
         # Ctrl+Backspace: Clear viewer
         clear_viewer_shortcut = QShortcut(QKeySequence("Ctrl+Backspace"), self)
         clear_viewer_shortcut.activated.connect(self.clear_viewer)
@@ -542,27 +554,33 @@ class Pod5Viewer(QMainWindow):
             self.preview_tab = None
 
 
-    def export_current_read(self) -> None:
-        """
-        Export the current read to a selected directory.
+# TODO: set up the export funcitonalities in a way that the following things can be done:
+#   - export all information of the currently focussed read to JSON
+#   - export all information of all opened reads to JSON
+#   - export the (pA) signal of the currently focussed read to txt/npy 
+#   - export the (pA) signal of all currently opened reads to txt/npy 
 
-        This method prompts the user to select a directory and exports the current read
-        to that directory. The current read is determined by the currently selected tab
-        in the data_tab_viewer.
+    def export_focussed_read(self) -> None:
+        """
+        Export all information of the currently focussed read to a selected path.
 
         Returns:
             None
         """
         if self.data_tab_viewer.count() > 0:
-            directory_path = self.open_export_dialog("Export current read")
-            if directory_path:
-                read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
-                self.export_read(directory_path, read_id)
+            read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
+            filepath, _ = QFileDialog.getSaveFileName(
+                parent = self,
+                caption = "Export current read",
+                dir = read_id+".json",
+                filter="JSON Files (*.json);;All Files (*)"
+            )
+            if filepath:                
+                self.write_json(read_id, filepath)
         else:
             self.show_no_data_opened_message()
 
-
-    def export_all_opened_reads(self) -> None:
+    def export_opened_reads(self) -> None:
         """
         Export all opened reads to the specified directory.
 
@@ -574,54 +592,112 @@ class Pod5Viewer(QMainWindow):
             None
         """
         if self.data_tab_viewer.count() > 0:
-            directory_path = self.open_export_dialog("Export current read")
-            if directory_path:
+            directory = QFileDialog.getExistingDirectory(
+                self,
+                "Select Output Directory"
+            )            
+            if directory:
                 for i in range(self.data_tab_viewer.count()):
                     read_id = self.data_tab_viewer.tabText(i)
-                    self.export_read(directory_path, read_id)
+                    filepath = os.path.join(directory, read_id+".json")
+                    self.write_json(read_id, filepath)
         else:
             self.show_no_data_opened_message()
         
-    def open_export_dialog(self, label: str) -> str:
+    def export_focussed_signal(self, in_pa: bool) -> None:
         """
-        Opens the dialog for selecting the directory in which data gets
-        exported. 
+        Export only the signal of the currently focussed read to a selected path.
 
-        Args:
-            label (str): Label to show in Dialog
+        This method prompts the user to select a directory and exports the current read
+        to that directory. The current read is determined by the currently selected tab
+        in the data_tab_viewer.
 
         Returns:
-            str: The path that was selected in the dialog.
+            None
         """
-        dialog = QFileDialog(self, label)
-        dialog.setFileMode(QFileDialog.FileMode.Directory)
-        dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
-        if dialog.exec():
-            try:
-                selected_path = dialog.selectedFiles()[0]
-            except IndexError:
-                raise Exception("Export dialog: No path given.") 
-            else: 
-                return selected_path
+        if self.data_tab_viewer.count() > 0:
+            export_str = "_export_pa" if in_pa else "_export" 
+            read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
+            filepath, _ = QFileDialog.getSaveFileName(
+                parent = self,
+                caption = "Export current read",
+                dir = read_id + export_str + ".npy",
+                filter="JSON Files (*.npy);;TXT Files (*.txt);;All Files (*)"
+            )
+            if filepath:
+                self.write_numpy(read_id, filepath, in_pa)
+        else:
+            self.show_no_data_opened_message()
 
+    def export_opened_signals(self, in_pa: bool, suffix: str) -> None:
+        if self.data_tab_viewer.count() > 0:
+            directory = QFileDialog.getExistingDirectory(
+                self,
+                "Select Output Directory"
+            )            
+            if directory:
+                export_str = "_export_pa" if in_pa else "_export" 
+                for i in range(self.data_tab_viewer.count()):
+                    read_id = self.data_tab_viewer.tabText(i)
+                    filepath = read_id + export_str + suffix
+                    self.write_numpy(read_id, filepath, in_pa)
+        else:
+            self.show_no_data_opened_message()
 
-    def export_read(self, directory: str, read_id: str) -> None:
+    def write_json(self, read_id: str, filepath: str) -> None:
         """
-        Exports the data of a specific read to a YAML file.
+        Writes the information of a read to JSON format.
+
         Args:
-
-        directory: The directory where the YAML file will be saved.
-        read_id: The ID of the read to export.        
+            read_id (str): ID of the read to retrieve information
+            filepath (str): Path to the output JSON file
         """
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        if read_id in self.opened_read_data.keys():
+            read_dict = self.transform_data(self.opened_read_data[read_id], shorten=False)
 
-        file_path = os.path.join(directory, f"{read_id}.yaml")
-        transformed_data = self.transform_data(self.opened_read_data[read_id], shorten=False)
-        with open(file_path, 'w') as file:
-            if read_id in self.opened_read_data.keys():
-                yaml.dump(transformed_data, file)
+            with open(filepath, 'w') as file:
+                json.dump(read_dict, file, indent=4)            
 
-        QApplication.restoreOverrideCursor()
+    def write_numpy(self, read_id: str, filepath: str, in_pa: bool) -> None:
+        """
+        Writes the signal of a given read to a numpy npy or txt file.
+
+        Args:
+            read_id (str): ID of the read to retrieve information
+            filepath (str): Path to the output .npy/.txt file
+        """
+        to_npy = filepath.endswith(".npy")
+
+        if read_id in self.opened_read_data.keys():
+            signal = self.opened_read_data[read_id]["signal_pa" if in_pa else "signal"]
+
+            try:
+                if to_npy:
+                    np.save(filepath, signal, allow_pickle=False)
+                else:
+                    np.savetxt(filepath, signal)
+            except PermissionError:
+                QMessageBox.critical(self, "Permission error", 
+                                        f"Figure could not be exported. You do not have permissions to write to path {filepath}")
+
+
+    # def export_read(self, directory: str, read_id: str) -> None:
+    #     """
+    #     Exports the data of a specific read to a YAML file.
+    #     Args:
+
+    #     directory: The directory where the YAML file will be saved.
+    #     read_id: The ID of the read to export.        
+    #     """
+    #     QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+
+    #     file_path = os.path.join(directory, f"{read_id}.yaml")
+    #     transformed_data = self.transform_data(self.opened_read_data[read_id], shorten=False)
+    #     with open(file_path, 'w') as file:
+    #         if read_id in self.opened_read_data.keys():
+    #             yaml.dump(transformed_data, file)
+
+    #     QApplication.restoreOverrideCursor()
 
 
     def transform_data(self, data: Dict[str, Any], shorten: bool = True) -> Dict[str, Any]:
