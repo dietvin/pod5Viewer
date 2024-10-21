@@ -4,7 +4,8 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QTreeView,
 from PySide6.QtGui import (QStandardItemModel, QStandardItem, QKeySequence, 
                            QShortcut, QIcon, QCloseEvent)
 from PySide6.QtCore import Qt
-import sys, os, pathlib, json, platform
+import sys, os, pathlib, json, platform, uuid
+from datetime import datetime, date
 from typing import Dict, List, Any, Tuple
 import numpy as np
 
@@ -121,7 +122,7 @@ class Pod5Viewer(QMainWindow):
         main_menu.addAction("Filter reads...", self.open_id_input_window)
         main_menu.addSeparator()
 
-        export_all_menu = main_menu.addMenu("Export all")
+        export_all_menu = main_menu.addMenu("Export all info")
         export_all_menu.addAction("Current read...", self.export_focussed_read)
         export_all_menu.addAction("All opened reads...", self.export_opened_reads)
         
@@ -554,25 +555,15 @@ class Pod5Viewer(QMainWindow):
             self.preview_tab = None
 
 
-# TODO: set up the export funcitonalities in a way that the following things can be done:
-#   - export all information of the currently focussed read to JSON
-#   - export all information of all opened reads to JSON
-#   - export the (pA) signal of the currently focussed read to txt/npy 
-#   - export the (pA) signal of all currently opened reads to txt/npy 
-
     def export_focussed_read(self) -> None:
         """
-        Export all information of the currently focussed read to a selected path.
-
-        Returns:
-            None
+        Export all information of the currently focussed read to a selected path in JSON format.
         """
         if self.data_tab_viewer.count() > 0:
             read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
-            filepath, _ = QFileDialog.getSaveFileName(
-                parent = self,
+            filepath = self.filepath_dialog(
                 caption = "Export current read",
-                dir = read_id+".json",
+                dir = read_id+"_export.json",
                 filter="JSON Files (*.json);;All Files (*)"
             )
             if filepath:                
@@ -580,69 +571,126 @@ class Pod5Viewer(QMainWindow):
         else:
             self.show_no_data_opened_message()
 
-    def export_opened_reads(self) -> None:
-        """
-        Export all opened reads to the specified directory.
 
-        This method prompts the user to select a directory and exports the data of
-        all opened reads to that directory. Each read is exported using the 
-        `export_read` method.
-
-        Returns:
-            None
-        """
-        if self.data_tab_viewer.count() > 0:
-            directory = QFileDialog.getExistingDirectory(
-                self,
-                "Select Output Directory"
-            )            
-            if directory:
-                for i in range(self.data_tab_viewer.count()):
-                    read_id = self.data_tab_viewer.tabText(i)
-                    filepath = os.path.join(directory, read_id+".json")
-                    self.write_json(read_id, filepath)
-        else:
-            self.show_no_data_opened_message()
-        
     def export_focussed_signal(self, in_pa: bool) -> None:
         """
-        Export only the signal of the currently focussed read to a selected path.
+        Export only the signal of the currently focussed read to a selected path in either binary npy or
+        text format. The format can be selected in the File Browser. 
 
-        This method prompts the user to select a directory and exports the current read
-        to that directory. The current read is determined by the currently selected tab
-        in the data_tab_viewer.
-
-        Returns:
-            None
+        Args:
+            in_pa (bool): True if the pA signal gets exported.
         """
         if self.data_tab_viewer.count() > 0:
             export_str = "_export_pa" if in_pa else "_export" 
             read_id = self.data_tab_viewer.tabText(self.data_tab_viewer.currentIndex())
-            filepath, _ = QFileDialog.getSaveFileName(
-                parent = self,
+            filepath = self.filepath_dialog(
                 caption = "Export current read",
                 dir = read_id + export_str + ".npy",
-                filter="JSON Files (*.npy);;TXT Files (*.txt);;All Files (*)"
+                filter="Numpy Files (*.npy);;TXT Files (*.txt);;All Files (*)"
             )
             if filepath:
                 self.write_numpy(read_id, filepath, in_pa)
         else:
             self.show_no_data_opened_message()
 
-    def export_opened_signals(self, in_pa: bool, suffix: str) -> None:
+
+    def filepath_dialog(self, caption: str, dir: str, filter: str) -> str:
+        """
+        Opens a file dialog for selecting a target file for exporting data.
+
+        Args:
+            caption (str): Caption of the Dialog
+            dir (str): Default directory/filename
+            caption (str): Active filter for specific file types
+
+        Returns:
+            str: Path to the target file after confirming a selection
+        """
+        filepath, _ = QFileDialog.getSaveFileName(
+            parent = self,
+            caption = caption,
+            dir = dir,
+            filter=filter
+        )
+        return filepath
+
+
+    def export_opened_reads(self) -> None:
+        """
+        Export all information of all opened reads to individual files in the specified 
+        directory.
+        """
         if self.data_tab_viewer.count() > 0:
-            directory = QFileDialog.getExistingDirectory(
-                self,
-                "Select Output Directory"
-            )            
+            directory = self.dirpath_dialog()
+            if directory:
+                for i in range(self.data_tab_viewer.count()):
+                    read_id = self.data_tab_viewer.tabText(i)
+                    filepath = os.path.join(directory, read_id+"_export.json")
+                    if self.resume_with_path(filepath):
+                        self.write_json(read_id, filepath)
+        else:
+            self.show_no_data_opened_message()
+        
+
+    def export_opened_signals(self, in_pa: bool, suffix: str) -> None:
+        """
+        Export the (pA) signal of all opened reads to individual files in the specified 
+        directory.
+
+        Args:
+            in_pa (bool): True if the pA signal gets exported
+            suffix (str): Selected file format
+        """
+        if self.data_tab_viewer.count() > 0:
+            directory = self.dirpath_dialog()
             if directory:
                 export_str = "_export_pa" if in_pa else "_export" 
                 for i in range(self.data_tab_viewer.count()):
                     read_id = self.data_tab_viewer.tabText(i)
                     filepath = read_id + export_str + suffix
-                    self.write_numpy(read_id, filepath, in_pa)
+                    if self.resume_with_path(filepath):
+                        self.write_numpy(read_id, filepath, in_pa)
         else:
             self.show_no_data_opened_message()
+
+
+    def dirpath_dialog(self) -> str:
+        """
+        Opens a file dialog for selecting a target directory for exporting data.
+
+        Returns:
+            str: Path to the target directory after confirming a selection
+        """
+
+        dirpath = QFileDialog.getExistingDirectory(
+            self,
+            "Select Output Directory"
+        )
+        return dirpath
+
+
+    def resume_with_path(self, filepath: str) -> bool:
+        """
+        Check if a file exists at a given path. If so opens a warning message and lets
+        the user select if they want to overwrite the file.
+
+        Args:
+            filepath (str): Path to a given file
+
+        Returns:
+            bool: True if the export process continues (file doesn't exist or gets overwritten) 
+        """
+        if os.path.isfile(filepath):
+            msg = QMessageBox(self)
+            msg.setWindowTitle("File Already Exists")
+            msg.setText(f"{os.path.basename(filepath)} already exists.<br>Do you want to replace it?")
+            msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            msg.setIcon(QMessageBox.Icon.Warning)
+            choice = msg.exec()
+
+            return choice == QMessageBox.StandardButton.Yes
+        return True
+
 
     def write_json(self, read_id: str, filepath: str) -> None:
         """
@@ -654,9 +702,9 @@ class Pod5Viewer(QMainWindow):
         """
         if read_id in self.opened_read_data.keys():
             read_dict = self.transform_data(self.opened_read_data[read_id], shorten=False)
-
             with open(filepath, 'w') as file:
                 json.dump(read_dict, file, indent=4)            
+
 
     def write_numpy(self, read_id: str, filepath: str, in_pa: bool) -> None:
         """
@@ -670,7 +718,6 @@ class Pod5Viewer(QMainWindow):
 
         if read_id in self.opened_read_data.keys():
             signal = self.opened_read_data[read_id]["signal_pa" if in_pa else "signal"]
-
             try:
                 if to_npy:
                     np.save(filepath, signal, allow_pickle=False)
@@ -681,48 +728,36 @@ class Pod5Viewer(QMainWindow):
                                         f"Figure could not be exported. You do not have permissions to write to path {filepath}")
 
 
-    # def export_read(self, directory: str, read_id: str) -> None:
-    #     """
-    #     Exports the data of a specific read to a YAML file.
-    #     Args:
-
-    #     directory: The directory where the YAML file will be saved.
-    #     read_id: The ID of the read to export.        
-    #     """
-    #     QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-
-    #     file_path = os.path.join(directory, f"{read_id}.yaml")
-    #     transformed_data = self.transform_data(self.opened_read_data[read_id], shorten=False)
-    #     with open(file_path, 'w') as file:
-    #         if read_id in self.opened_read_data.keys():
-    #             yaml.dump(transformed_data, file)
-
-    #     QApplication.restoreOverrideCursor()
-
-
     def transform_data(self, data: Dict[str, Any], shorten: bool = True) -> Dict[str, Any]:
         """
-        Transforms the "signal" and "signal_pa" entries in the data to comma separated strings.
+        Prepares the data to be shown in the data view panel or for exporting. Transforms
+        data types to types that can be handled by JSON format.
 
         Args:
-            data (Dict[str, Any]): The data to be transformed.
+            data (Dict[str, Any]): The data to be transformed
+            shorten (bool): True when setting up data for exporting 
 
         Returns:
             Dict[str, Any]: The transformed data.
         """
         transformed_data = {}
         for key, value in data.items():
-            if key == "signal" or key == "signal_pa":
+            if isinstance(value, np.ndarray):
                 num_values = 100
                 if shorten and (len(value) > num_values):
                     transformed_data[key] = ",".join(str(x) for x in value[:num_values]) + "..."
                 else:
-                    transformed_data[key] = ",".join(str(x) for x in value)
-            elif key == "read_id":
+                    transformed_data[key] = value.tolist()
+            elif isinstance(value, uuid.UUID):
                 transformed_data[key] = str(value)
+            elif isinstance(value, (date, datetime)):
+                transformed_data[key] = value.isoformat()
+            elif isinstance(value, Dict):
+                transformed_data[key] = self.transform_data(value, False)
             else:
                 transformed_data[key] = value
         return transformed_data
+
 
     def show_full_signal(self, in_pa: bool = False) -> None:
         """
