@@ -228,11 +228,6 @@ class ArrayTableViewer(QMainWindow):
         Initializes the menu with export and help options.
         """
         menu = self.menuBar()
-
-        export_menu = menu.addMenu("&Export")
-        export_menu.addAction("To numpy...", self.export)
-        export_menu.addAction("To text...", lambda: self.export(to_npy=False))
-
         menu.addAction("&Help", self.show_help)
 
 
@@ -361,43 +356,6 @@ class ArrayTableViewer(QMainWindow):
         self.scroll_bar.setMinimum(0)
         self.scroll_bar.setMaximum(self.n_bins-1)
         self.scroll_bar.setValue(0)
-
-    def export(self, to_npy: bool = True) -> None:
-        """
-        Exports the full signal to a specified format.
-
-        Args:
-            to (str): target format. Must be either of: 'numpy', 'text'
-        """
-
-        extension = "npy" if to_npy else "txt"
-        pa_label = "_pA" if self.in_pa else ""
-        filename = f"{self.read_id}{pa_label}_export.{extension}"
-
-        dialog = QFileDialog(self, "Export current view")
-        dialog.selectFile(filename)
-
-        if dialog.exec():
-            outpath = dialog.selectedFiles()[0]
-            if to_npy:
-                self.export_npy(outpath)
-            else:
-                self.export_text(outpath)
-
-    def export_npy(self, path: str):
-        try:
-            np.save(path, self.full_data, allow_pickle=False)
-        except PermissionError:
-            QMessageBox.critical(self, "Permission error", 
-                                    f"Figure could not be exported. You do not have permissions to write to path {path}")
-    
-    def export_text(self, path: str):
-        try:
-            with open(path, "w") as f:
-                f.write("\n".join(self.full_data.astype(str)))
-        except PermissionError:
-            QMessageBox.critical(self, "Permission error", 
-                                    f"Figure could not be exported. You do not have permissions to write to path {path}")
 
     def show_help(self) -> None:
         """
