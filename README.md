@@ -100,7 +100,6 @@ The pod5Viewer is built in Python (v3.11.0) and relies on the following packages
 - pod5 (v0.3.10)
 - pyside6 (v6.5.2)
 - matplotlib (v3.9.2)
-- pyyaml (v6.0.1)
 
 The compliation for Windows was performed using the pyinstaller (v6.8.0) and the Windows installer was created using the Inno Setup Compiler (v6.3.1).
 
@@ -129,7 +128,7 @@ To clear the subset, reopen the window, press `Clear` and `Done`. Afterwards all
 
 ### Viewing signals
 
-Individual current measurement can be inspected via `View > View signal`. This shows the current values in chunks. Use the scroll bar to scroll through chunks. The measurements of a read can be exported isolated from the remaining data of a given read through the `Export` menu. The values can be exported to a `.npy` Numpy file for further processing in a `Numpy` environment. Alternatively, they can be written to a text file, where each line contains one measurement.
+Individual current measurement can be inspected via `View > View signal`. This shows the current values in chunks. Use the scroll bar to scroll through chunks. 
 
 ![read filter](./images/pod5Viewer_view_data.png)
 
@@ -153,7 +152,9 @@ For faster performance and responsiveness of the window, long signals are subset
 
 ### Exporting reads
 
-Either all opened reads (`Export all opened reads...`) or only the currently focused one (`Export current read...`) can be exported to YAML format using via  `File > Export`. When exporting, the user selects an output directory in the file browser, in which a YAML file is created for each exported read with the read-id as the file name.
+Either all opened reads (`All opened reads...`) or only the currently focused one (`Current read...`) can be exported to JSON format using `File > Export all info`. When exporting, the user selects an output file or directory in the file browser, where a JSON file is created for each exported read with the read-id as the file name.
+
+The measurements of a read can be exported isolated from the remaining data of a given read through the `Export signal` menu. The values can be exported to a `.npy` Numpy file for further processing in a `Numpy` environment. Alternatively, they can be written to a text file, where each line contains one measurement.
 
 ### Shortcuts
 
