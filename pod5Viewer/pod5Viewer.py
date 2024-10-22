@@ -627,7 +627,8 @@ class Pod5Viewer(QMainWindow):
                     read_id = self.data_tab_viewer.tabText(i)
                     filepath = os.path.join(directory, read_id+"_export.json")
                     if self.resume_with_path(filepath):
-                        self.write_json(read_id, filepath)
+                        success = self.write_json(read_id, filepath)
+                        if not success: break
         else:
             self.show_no_data_opened_message()
         
@@ -647,9 +648,10 @@ class Pod5Viewer(QMainWindow):
                 export_str = "_export_pa" if in_pa else "_export" 
                 for i in range(self.data_tab_viewer.count()):
                     read_id = self.data_tab_viewer.tabText(i)
-                    filepath = read_id + export_str + suffix
+                    filepath = os.path.join(directory, read_id + export_str + suffix)
                     if self.resume_with_path(filepath):
-                        self.write_numpy(read_id, filepath, in_pa)
+                        success = self.write_numpy(read_id, filepath, in_pa)
+                        if not success: break
         else:
             self.show_no_data_opened_message()
 
@@ -661,7 +663,6 @@ class Pod5Viewer(QMainWindow):
         Returns:
             str: Path to the target directory after confirming a selection
         """
-
         dirpath = QFileDialog.getExistingDirectory(
             self,
             "Select Output Directory"
@@ -692,23 +693,38 @@ class Pod5Viewer(QMainWindow):
         return True
 
 
-    def write_json(self, read_id: str, filepath: str) -> None:
+    def write_json(self, read_id: str, filepath: str) -> bool:
         """
         Writes the information of a read to JSON format.
+
+        Note: the bool return allows the program to break the for loop when exporting multiple files
+        (if one fails, all will fail because it is the same directory).
 
         Args:
             read_id (str): ID of the read to retrieve information
             filepath (str): Path to the output JSON file
+
+        Returns:
+            bool: True, if the write operation was successfull
         """
         if read_id in self.opened_read_data.keys():
             read_dict = self.transform_data(self.opened_read_data[read_id], shorten=False)
-            with open(filepath, 'w') as file:
-                json.dump(read_dict, file, indent=4)            
+            try: 
+                with open(filepath, 'w') as file:
+                    json.dump(read_dict, file, indent=4)
+            except PermissionError:
+                QMessageBox.critical(self, "Permission error", 
+                                        f"Export failed. You do not have permissions to write to path {filepath}")
+                return False
+        return True
 
 
-    def write_numpy(self, read_id: str, filepath: str, in_pa: bool) -> None:
+    def write_numpy(self, read_id: str, filepath: str, in_pa: bool) -> bool:
         """
         Writes the signal of a given read to a numpy npy or txt file.
+
+        Note: the bool return allows the program to break the for loop when exporting multiple files
+        (if one fails, all will fail because it is the same directory).
 
         Args:
             read_id (str): ID of the read to retrieve information
@@ -725,7 +741,9 @@ class Pod5Viewer(QMainWindow):
                     np.savetxt(filepath, signal)
             except PermissionError:
                 QMessageBox.critical(self, "Permission error", 
-                                        f"Figure could not be exported. You do not have permissions to write to path {filepath}")
+                                        f"Export failed. You do not have permissions to write to path {filepath}")
+                return False
+        return True
 
 
     def transform_data(self, data: Dict[str, Any], shorten: bool = True) -> Dict[str, Any]:
