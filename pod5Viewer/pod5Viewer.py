@@ -3,7 +3,6 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QTreeView,
                                QFileDialog, QMessageBox, QTabWidget)
 from PySide6.QtGui import (QStandardItemModel, QStandardItem, QKeySequence, 
                            QShortcut, QIcon, QCloseEvent)
-from PySide6.QtCore import Qt
 import sys, os, pathlib, json, platform, uuid
 from datetime import datetime, date
 from typing import Dict, List, Any, Tuple
