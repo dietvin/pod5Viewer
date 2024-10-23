@@ -27,7 +27,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
 
 For Windows systems the pod5Viewer can be installed conveniently via the installer. The installer can be downloaded here:
 
-[pod5Viewer-1.1.0-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5Viewer-1.1.0-Setup.exe "Download pod5Viewer Windows installer") 
+[pod5Viewer-1.1.1-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5Viewer-1.1.1-Setup.exe "Download pod5Viewer Windows installer") 
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
@@ -37,10 +37,10 @@ After downloading the installer and following the steps provided, the pod5Viewer
 
 DEB files are available for Ubuntu 22.04 & 24.04 and Linux Mint 20.3 & 21.3 at the following links:
 
-- [Ubuntu 22.04](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5viewer_1.1.0_ubuntu_22.04.deb "Download pod5Viewer for Ubuntu 22.04")
-- [Ubuntu 24.04](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5viewer_1.1.0_ubuntu_24.04.deb "Download pod5Viewer for Ubuntu 24.04")
-- [Linux Mint 21.3](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5viewer_1.1.0_linuxmint_21.3.deb "Download pod5Viewer for Linux Mint 21.3")
-- [Linux Mint 20.3](https://github.com/dietvin/pod5Viewer/releases/download/1.1.0/pod5viewer_1.1.0_linuxmint_20.3.deb "Download pod5Viewer for Linux Mint 20.3")
+- [Ubuntu 22.04](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_ubuntu_22.04.deb "Download pod5Viewer for Ubuntu 22.04")
+- [Ubuntu 24.04](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_ubuntu_24.04.deb "Download pod5Viewer for Ubuntu 24.04")
+- [Linux Mint 21.3](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_linuxmint_21.3.deb "Download pod5Viewer for Linux Mint 21.3")
+- [Linux Mint 20.3](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_linuxmint_20.3.deb "Download pod5Viewer for Linux Mint 20.3")
 
 After downloading use apt to install it on the system:
 
@@ -98,7 +98,6 @@ The pod5Viewer is built in Python (v3.11.0) and relies on the following packages
 - pod5 (v0.3.10)
 - pyside6 (v6.5.2)
 - matplotlib (v3.9.2)
-- pyyaml (v6.0.1)
 
 The compliation for Windows was performed using the pyinstaller (v6.8.0) and the Windows installer was created using the Inno Setup Compiler (v6.3.1).
 
@@ -127,7 +126,7 @@ To clear the subset, reopen the window, press `Clear` and `Done`. Afterwards all
 
 ### Viewing signals
 
-Individual current measurement can be inspected via `View > View signal`. This shows the current values in chunks. Use the scroll bar to scroll through chunks. The measurements of a read can be exported isolated from the remaining data of a given read through the `Export` menu. The values can be exported to a `.npy` Numpy file for further processing in a `Numpy` environment. Alternatively, they can be written to a text file, where each line contains one measurement.
+Individual current measurement can be inspected via `View > View signal`. This shows the current values in chunks. Use the scroll bar to scroll through chunks. 
 
 ![read filter](./images/pod5Viewer_view_data.png)
 
@@ -151,7 +150,9 @@ For faster performance and responsiveness of the window, long signals are subset
 
 ### Exporting reads
 
-Either all opened reads (`Export all opened reads...`) or only the currently focused one (`Export current read...`) can be exported to YAML format using via  `File > Export`. When exporting, the user selects an output directory in the file browser, in which a YAML file is created for each exported read with the read-id as the file name.
+Either all opened reads (`All opened reads...`) or only the currently focused one (`Current read...`) can be exported to JSON format using `File > Export all info`. When exporting, the user selects an output file or directory in the file browser, where a JSON file is created for each exported read with the read-id as the file name.
+
+The measurements of a read can be exported isolated from the remaining data of a given read through the `Export signal` menu. The values can be exported to a `.npy` Numpy file for further processing in a `Numpy` environment. Alternatively, they can be written to a text file, where each line contains one measurement.
 
 ### Shortcuts
 

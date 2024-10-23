@@ -16,8 +16,5 @@ HELP_TEXT = """
         <br><br> 
         The row names indicate the 0-based position in the signal of the leftmost 
         measurement in the row. 
-        <br><br> 
-        The entire signal can be exported to .npy for further processing with numpy or to
-        text format. Export functions can be accessed from the Export menu.
     </p>
     """
