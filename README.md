@@ -20,6 +20,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
   - [Exporting reads](#exporting-reads)
   - [Shortcuts](#shortcuts)
 - [License](#license)
+- [How to cite](#how-to-cite)
 
 ## Installation and requirements
 
@@ -187,3 +188,23 @@ View signal window:
 ## License
 
 This project is licensed under the GPL3.0 License. See the [LICENSE](./LICENSE) file for details.
+
+## How to cite
+
+DOI: [https://doi.org/10.1093/bioinformatics/btae665](https://doi.org/10.1093/bioinformatics/btae665)
+
+If you use this tool in your work, we would be really happy if you cite us:
+```
+@article{10.1093/bioinformatics/btae665,
+    author = {Dietrich, Vincent and Alagna, Nicolò and Helm, Mark and Gerber, Susanne and Butto, Tamer},
+    title = {Pod5Viewer: a GUI for inspecting raw nanopore sequencing data},
+    journal = {Bioinformatics},
+    pages = {btae665},
+    year = {2024},
+    month = {12},
+    issn = {1367-4811},
+    doi = {10.1093/bioinformatics/btae665},
+    url = {https://doi.org/10.1093/bioinformatics/btae665},
+    eprint = {https://academic.oup.com/bioinformatics/advance-article-pdf/doi/10.1093/bioinformatics/btae665/60938432/btae665.pdf},
+}
+```
