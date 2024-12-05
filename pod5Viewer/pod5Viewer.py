@@ -386,7 +386,16 @@ class Pod5Viewer(QMainWindow):
         Args:
             file_paths (List[str]): A list of file paths to POD5 files to be loaded.
         """
-        paths_as_path = [pathlib.Path(i) for i in file_paths]
+        current_dir = os.getcwd()
+        file_paths_processed = []
+        for path in file_paths:
+            # joins a relative path with the current directory to get an absolute path
+            # avoids issues where the relative paths are searched in /tmp on linux systems
+            if not os.path.isabs(path):
+                path = os.path.join(current_dir, path) 
+            file_paths_processed.append(path)
+
+        paths_as_path = [pathlib.Path(i) for i in file_paths_processed]
         self.data_handler = DataHandler(paths_as_path)
         file_navigator_data = self.data_handler.ids_to_path()
 
