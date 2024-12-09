@@ -205,6 +205,6 @@ If you use this tool in your work, we would be really happy if you cite us:
     issn = {1367-4811},
     doi = {10.1093/bioinformatics/btae665},
     url = {https://doi.org/10.1093/bioinformatics/btae665},
-    eprint = {https://academic.oup.com/bioinformatics/advance-article-pdf/doi/10.1093/bioinformatics/btae665/60938432/btae665.pdf},
+    eprint = {https://academic.oup.com/bioinformatics/article/40/12/btae665/7915477},
 }
 ```
