@@ -36,20 +36,24 @@ After downloading the installer and following the steps provided, the pod5Viewer
 
 ### Linux
 
-DEB files are available for Ubuntu 22.04 & 24.04 and Linux Mint 20.3 & 21.3 at the following links:
+On Linux systems the pod5Viewer can be installed via [snap](https://snapcraft.io/docs/installing-snapd) from the provided snap package:
 
-- [Ubuntu 22.04](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_ubuntu_22.04.deb "Download pod5Viewer for Ubuntu 22.04")
-- [Ubuntu 24.04](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_ubuntu_24.04.deb "Download pod5Viewer for Ubuntu 24.04")
-- [Linux Mint 21.3](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_linuxmint_21.3.deb "Download pod5Viewer for Linux Mint 21.3")
-- [Linux Mint 20.3](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_linuxmint_20.3.deb "Download pod5Viewer for Linux Mint 20.3")
+[pod5viewer_1.1.1_amd64.snap](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_amd64.snap)
 
-After downloading use apt to install it on the system:
-
+To install the package run the following command:
 ```bash
-sudo apt install ./pod5viewer_<VERSION>_<SYSTEM>.deb
+sudo snap install ./pod5viewer_1.1.1_amd64.snap --dangerous 
 ```
+Afterwards the pod5Viewer can be opened from the command line via `pod5viewer` or like any other installed GUI application.
 
-Like the Windows installation, the pod5Viewer can then be opened like any other installed application.
+The Snap installation should work on all x86 based systems. We tested the installation on:
+- Ubuntu 24.04
+- Ubuntu 22.04
+- Linux Mint 21.3
+- Linux Mint 20.3
+- Debian 12
+
+Note: The `--dangerous` flag must be added when installing from a snap file. We are currently working on providing the pod5Viewer from the Snap Store for a more convenient installation without it. 
 
 ### OS-independent
 
