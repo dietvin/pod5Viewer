@@ -770,22 +770,21 @@ class FigureWindow(QMainWindow):
         Opens a file dialog to select the export location and filename.
         The figure is saved with the size of 10x6 inches and includes the legend.
         """
-        filename = datetime.now().strftime("%Y%m%d_%H%M%S") + "_export.svg"
-
-        dialog = QFileDialog(self, "Export current view")
-        dialog.selectFile(filename)
-
-        if dialog.exec():
-            outpath = dialog.selectedFiles()[0]
+        filepath, _ = QFileDialog.getSaveFileName(
+            parent = self,
+            caption = "Export current view",
+            dir = datetime.now().strftime("%Y%m%d_%H%M%S") + "_export.svg",
+            filter= "SVG Files (*.svg);;PNG Files (*.png);;All Files (*)"
+        )
+        if filepath:
             try:
-
                 fig = copy.deepcopy(self.fig)
                 fig.set_size_inches(*EXPORT_FIG_SIZE)
                 ax = fig.get_axes()[0]
                 ax.legend(bbox_to_anchor=(1,1))
 
                 fig.tight_layout()
-                fig.savefig(outpath)
+                fig.savefig(filepath)
             except PermissionError:
                 QMessageBox.critical(self, "Permission error", 
-                                     f"Figure could not be exported. You do not have permissions to write to path {outpath}")
+                                     f"Figure could not be exported. You do not have permissions to write to path {filepath}")
