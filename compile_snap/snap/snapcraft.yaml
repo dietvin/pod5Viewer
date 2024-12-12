@@ -1,0 +1,28 @@
+name: pod5viewer
+version: "1.1.1"
+summary: A GUI for inspecting pod5 files
+description: |
+  The pod5Viewer is a Python application that provides a graphical user interface for viewing and navigating through POD5 files. 
+  It allows users to open multiple POD5 files, explore their contents, and display detailed data for selected read IDs.
+base: core22
+
+grade: stable
+confinement: strict
+
+parts:
+  pod5viewer:
+    plugin: python
+    source: https://github.com/dietvin/pod5Viewer.git
+
+apps:
+  pod5viewer:
+    command: bin/pod5Viewer
+    desktop: snap/gui/pod5viewer.desktop
+    plugs:
+      - desktop
+      - desktop-legacy
+      - opengl
+      - wayland
+      - x11
+      - home
+    extensions: [kde-neon-6] # make Qt6 available

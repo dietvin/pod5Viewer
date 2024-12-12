@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.1.1
+Type=Application
+Name=pod5Viewer
+Exec=pod5viewer
+Icon=${SNAP}/meta/gui/icon.png
+Terminal=false
+Categories=Science;Education;

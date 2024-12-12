@@ -170,14 +170,11 @@ _internal/
 # Exclude test_data folder from the ignore rule
 !test_data/
 
-ubuntu_compile/
-
 # Ignore all files in the linux_compile folder
-linux_compile/*.deb
-linux_compile/build/
-linux_compile/dist/
+compile_deb/*.deb
+compile_deb/build/
+compile_deb/dist/
 
 *.exe
 *.dmg
-
-macos_compile/
+*.snap
