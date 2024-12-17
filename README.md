@@ -2,7 +2,7 @@
 
 The pod5Viewer is a Python application that provides a graphical user interface for viewing and navigating through POD5 files. It allows users to open multiple POD5 files, explore their contents, and display detailed data for selected read IDs.
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md) ![GitHub Release](https://img.shields.io/github/v/release/dietvin/pod5Viewer) ![PyPI - Version](https://img.shields.io/pypi/v/pod5Viewer) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/dietvin/pod5Viewer/total)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md) [![pod5viewer](https://snapcraft.io/pod5viewer/badge.svg)](https://snapcraft.io/pod5viewer) ![GitHub Release](https://img.shields.io/github/v/release/dietvin/pod5Viewer) ![PyPI - Version](https://img.shields.io/pypi/v/pod5Viewer) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/dietvin/pod5Viewer/total)
 
 ## Table of Contents
 
@@ -35,14 +35,9 @@ After downloading the installer and following the steps provided, the pod5Viewer
 **Note**: When running the installer a the Windows defender might open the Window `Windows protected your PC`. To continue the installation, press `More Info` and `Run anyway`.
 
 ### Linux
-
-On Linux systems the pod5Viewer can be installed via [snap](https://snapcraft.io/docs/installing-snapd) from the provided snap package:
-
-[pod5viewer_1.1.1_amd64.snap](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5viewer_1.1.1_amd64.snap)
-
-To install the package run the following command:
+On Linux systems the pod5Viewer can be installed via [snap](https://snapcraft.io/docs/installing-snapd). To install the package run the following command:
 ```bash
-sudo snap install ./pod5viewer_1.1.1_amd64.snap --dangerous 
+sudo snap install --edge pod5viewer 
 ```
 Afterwards the pod5Viewer can be opened from the command line via `pod5viewer` or like any other installed GUI application.
 
@@ -53,8 +48,6 @@ The Snap installation should work on all x86 based systems. We tested the instal
 - Linux Mint 20.3
 - Debian 12
 
-Note: The `--dangerous` flag must be added when installing from a snap file. We are currently working on providing the pod5Viewer from the Snap Store for a more convenient installation without it. 
-
 ### OS-independent
 
 The pod5Viewer can be installed via the Python packaging index using `pip`.
@@ -64,7 +57,7 @@ Note that when installing the pod5Viewer via pip, it can only be started from th
 Here we recommend installing the pod5Viewer into a fresh virtual environment via [Conda](https://docs.anaconda.com/miniconda/) or a similar environment manager:
 
 ```bash
-conda create -n p5v python==3.11 
+conda create -n p5v python==3.12 
 conda activate p5v
 ```
 
@@ -98,11 +91,12 @@ pip install .
 
 ### Dependencies
 
-The pod5Viewer is built in Python (v3.11.0) and relies on the following packages:
+The pod5Viewer is built in Python (v3.12.0) and relies on the following packages:
 
-- pod5 (v0.3.10)
-- pyside6 (v6.5.2)
-- matplotlib (v3.9.2)
+- numpy (v2.2.0)
+- pod5 (v0.3.23)
+- pyside6 (v6.8.1)
+- matplotlib (v3.10.0)
 
 The compliation for Windows was performed using the pyinstaller (v6.8.0) and the Windows installer was created using the Inno Setup Compiler (v6.3.1).
 
