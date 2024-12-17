@@ -8,6 +8,8 @@ base: core22
 
 grade: stable
 confinement: strict
+architectures:
+  - build-on: amd64
 
 parts:
   pod5viewer:
