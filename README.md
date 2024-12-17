@@ -28,7 +28,7 @@ The pod5Viewer is a Python application that provides a graphical user interface 
 
 For Windows systems the pod5Viewer can be installed conveniently via the installer. The installer can be downloaded here:
 
-[pod5Viewer-1.1.1-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.1.1/pod5Viewer-1.1.1-Setup.exe "Download pod5Viewer Windows installer") 
+[pod5Viewer-1.1.2-Setup.exe](https://github.com/dietvin/pod5Viewer/releases/download/1.1.2/pod5Viewer-1.1.2-Setup.exe "Download pod5Viewer Windows installer") 
 
 After downloading the installer and following the steps provided, the pod5Viewer can be accessed and opened from the start menu or the desktop shortcut. It also sets the pod5Viewer as the standard application to open POD5 files, so it is possible to open a file by simply clicking on it.
 
@@ -57,7 +57,7 @@ Note that when installing the pod5Viewer via pip, it can only be started from th
 Here we recommend installing the pod5Viewer into a fresh virtual environment via [Conda](https://docs.anaconda.com/miniconda/) or a similar environment manager:
 
 ```bash
-conda create -n p5v python==3.12 
+conda create -n p5v python==3.10
 conda activate p5v
 ```
 
@@ -91,12 +91,12 @@ pip install .
 
 ### Dependencies
 
-The pod5Viewer is built in Python (v3.12.0) and relies on the following packages:
+The pod5Viewer is built in Python (v3.10.0) and relies on the following packages:
 
-- numpy (v2.2.0)
-- pod5 (v0.3.23)
-- pyside6 (v6.8.1)
-- matplotlib (v3.10.0)
+- numpy (v1.26.4)
+- pod5 (v0.3.10)
+- pyside6 (v6.5.2)
+- matplotlib (v3.9.2)
 
 The compliation for Windows was performed using the pyinstaller (v6.8.0) and the Windows installer was created using the Inno Setup Compiler (v6.3.1).
 
