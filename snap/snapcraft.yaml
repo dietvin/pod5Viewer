@@ -1,5 +1,5 @@
 name: pod5viewer
-version: "1.1.1"
+version: "1.1.2"
 summary: A GUI for inspecting pod5 files
 description: |
   The pod5Viewer is a Python application that provides a graphical user interface for viewing and navigating through POD5 files. 
