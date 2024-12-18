@@ -48,6 +48,8 @@ The Snap installation should work on all x86 based systems. We tested the instal
 - Linux Mint 20.3
 - Debian 12
 
+**Note**: When opening from a file browser, pod5 files may not get associated to the pod5Viewer automatically. In this case, when first opening a pod5 file, use right click, `Open with...` and set pod5Viewer as the default.
+
 ### OS-independent
 
 The pod5Viewer can be installed via the Python packaging index using `pip`.
