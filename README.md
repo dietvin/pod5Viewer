@@ -37,7 +37,7 @@ After downloading the installer and following the steps provided, the pod5Viewer
 ### Linux
 On Linux systems the pod5Viewer can be installed via [snap](https://snapcraft.io/docs/installing-snapd). To install the package run the following command:
 ```bash
-sudo snap install --edge pod5viewer 
+sudo snap install pod5viewer 
 ```
 Afterwards the pod5Viewer can be opened from the command line via `pod5viewer` or like any other installed GUI application.
 
@@ -47,6 +47,7 @@ The Snap installation should work on all x86 based systems. We tested the instal
 - Linux Mint 21.3
 - Linux Mint 20.3
 - Debian 12
+- Arch Linux
 
 **Note**: When opening from a file browser, pod5 files may not get associated to the pod5Viewer automatically. In this case, when first opening a pod5 file, use right click, `Open with...` and set pod5Viewer as the default.
 
